@@ -1,6 +1,7 @@
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
 import { PrismaFlow } from '../components/srmaPlots'
+import { PrismaTower } from '../components/Solids'
 
 export default function Prisma() {
   const { state, updatePrisma } = useStore()
@@ -63,6 +64,8 @@ export default function Prisma() {
           </div>
         </div>
       </div>
+
+      <PrismaTower p={p} />
     </>
   )
 }

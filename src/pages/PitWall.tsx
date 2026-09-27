@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Kicker, Rule, AssayBadge, StatCard } from '../components/ui'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { analysisIncluded } from '../lib/cohorts'
+import { AxisColumns } from '../components/Solids'
 
 function sevRank(s: 'low' | 'med' | 'high') {
   return s === 'high' ? 3 : s === 'med' ? 2 : 1
@@ -58,6 +59,7 @@ export default function PitWall() {
           <div className="card">
             <div className="card-h"><span className="sq" style={{ background: 'var(--blue)' }} />RESEARCH AXES · completed assays</div>
             {axes.length === 0 && <p className="empty">Add assays to track this project's research axes. <Link to="/assays">Plan an assay →</Link></p>}
+            <AxisColumns axes={axes} />
             {axes.map((a) => (
               <div className="axis" key={a.name}>
                 <span className="name">{a.name}</span>

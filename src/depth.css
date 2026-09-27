@@ -199,6 +199,11 @@ html[data-dim-swap="2d"]::view-transition-new(root){animation:dim-drop-flat .6s 
 
 /* ---------- WebGL: the livery ribbons (gl/ribbons.ts) ---------- */
 .depth-gl{position:absolute; inset:0; width:100%; height:100%}
+/* the pointer's work light: it pools on the floor between the slabs */
+.depth-spot{position:absolute; inset:0; pointer-events:none; opacity:var(--spot-on,0); transition:opacity .5s ease;
+  background:radial-gradient(260px 200px at var(--spot-x,50%) var(--spot-y,50%), color-mix(in srgb, var(--blue) 12%, transparent), transparent 70%)}
+html[data-theme="night"] .depth-spot{background:radial-gradient(300px 230px at var(--spot-x,50%) var(--spot-y,50%), rgba(96,138,255,.2), transparent 70%)}
+@media(prefers-reduced-motion:reduce){.depth-spot{display:none}}
 
 /* ---------- the Overview monitor (components/EcgMonitor.tsx) ----------
    A dark screen in either theme, like the real thing: ECG grid behind a
