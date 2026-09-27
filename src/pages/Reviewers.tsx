@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
 import { Markdown } from '../components/Markdown'
+import { Sk } from '../components/Skeleton'
 import { parseComments, reviewContext, buildLetter } from '../lib/reviewers'
 import { computeMeta, computeGrade, eggersTest, fmt } from '../lib/metaAnalysis'
 import { complete, parseJsonLoose, hasKey, getModel } from '../lib/openai'
@@ -117,6 +118,7 @@ export default function Reviewers() {
 
         <div className="card lg">
           <div className="card-h"><span className="sq" style={{ background: 'var(--green)' }} />RESPONSE LETTER</div>
+          {aiOn && <div style={{ marginBottom: 14 }}><Sk kind="letter" label={`Drafting ${comments.length} response${comments.length === 1 ? '' : 's'}`} parts={comments.map((c) => c.label)} /></div>}
           {comments.length === 0 ? (
             <p className="empty">Paste the reviewers' report on the left to build the letter. Responses are grounded in this review: {pooled ? <>pooled <b>{pooled}</b>, <b>{grade.certainty}</b> certainty.</> : 'add studies for the pooled estimate to be cited.'}</p>
           ) : (

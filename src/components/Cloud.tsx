@@ -8,6 +8,7 @@ import {
 import { watchWorkspaceSync, type Resolution, type SyncStatus } from '../lib/cloudSync'
 import { download } from '../lib/reviewSessions'
 import { Portal } from './Portal'
+import { Sk } from './Skeleton'
 
 const AUTOSYNC_LS = 'williamslab.cloud.autosync'
 
@@ -203,6 +204,7 @@ export default function Cloud({ open, onClose, onSyncStatus }: { open: boolean; 
                   <button className="btn primary sm" onClick={() => doSync()} disabled={!!busy || syncStatus.phase === 'checking' || !syncRef.current}>{syncStatus.phase === 'checking' ? 'Syncing…' : '↕ Sync now'}</button>
                   <button className="btn ghost sm" onClick={doShare} disabled={!!busy}>{busy === 'share' ? 'Sharing…' : '🔗 Share this project'}</button>
                 </div>
+                {syncStatus.phase === 'checking' && <div style={{ marginBottom: 12 }}><Sk kind="sync" label={syncStatus.message} /></div>}
                 {syncStatus.phase === 'conflict' && <div className="card" style={{ padding: 12, marginBottom: 12 }}>
                   <p className="small" style={{ marginBottom: 10 }}>Choose a version for the conflicting items. A local backup is saved before applying the choice.</p>
                   <div className="wrap-gap">

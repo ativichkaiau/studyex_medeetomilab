@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { useSwapNavigate } from '../lib/swap'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
 import { isCloudConfigured, loadSharedProject } from '../lib/supabase'
+import { Sk } from '../components/Skeleton'
 
 type State = 'loading' | 'notconfig' | 'notfound' | { name: string; project: unknown }
 
 export default function SharedImport() {
   const { id } = useParams()
   const { importProject } = useStore()
-  const nav = useNavigate()
+  const nav = useSwapNavigate()
   const [st, setSt] = useState<State>('loading')
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function SharedImport() {
         <h1>Import a shared project</h1>
       </div>
       <div className="card lg">
-        {st === 'loading' && <p className="small">Loading the shared project…</p>}
+        {st === 'loading' && <Sk kind="snapshot" />}
         {st === 'notconfig' && <p className="empty">This device isn’t connected to a cloud project, so it can’t open share links. Connect one via the ☁ Cloud button in the top bar.</p>}
         {st === 'notfound' && <p className="empty">That shared project couldn’t be found — the link may be wrong or it was removed.</p>}
         {typeof st === 'object' && (

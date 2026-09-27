@@ -9,6 +9,7 @@ import { Kicker, Rule } from '../components/ui'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { PassageCard, ClaimModal } from '../components/Evidence'
 import { PublicationWatch } from '../components/PublicationWatch'
+import { Sk } from '../components/Skeleton'
 
 export default function EvidenceLibrary() {
   const { state } = useStore()
@@ -82,7 +83,8 @@ function ProjectEvidenceLibrary() {
         <Field label="Reference"><select className="select" value={refId} disabled={!!reading} onChange={(ev) => chooseReference(ev.target.value)}><option value="">New reference…</option>{refs.map((r) => <option value={r.id} key={r.id}>{r.title || `${r.author} ${r.year}`}</option>)}</select></Field>
         <Field label="Source title"><input className="input" value={title} onChange={(ev) => setTitle(ev.target.value)} /></Field>
         <div className="form-row"><Field label="DOI · optional"><input className="input" value={doi} onChange={(ev) => setDoi(ev.target.value)} placeholder="10.1234/example" /></Field><Field label="PMID · optional"><input className="input" value={pmid} onChange={(ev) => setPmid(ev.target.value)} /></Field></div>
-        <div className="wrap-gap"><button className="btn ghost sm" disabled={!!reading} onClick={() => fileRef.current?.click()}>{reading || 'Select passage from PDF'}</button>{pdf && <button className="btn ghost sm" onClick={() => { setPdf(null); setText(''); setLocator('') }}>Use pasted text</button>}</div>
+        <div className="wrap-gap"><button className="btn ghost sm" disabled={!!reading} onClick={() => fileRef.current?.click()}>Select passage from PDF</button>{pdf && <button className="btn ghost sm" onClick={() => { setPdf(null); setText(''); setLocator('') }}>Use pasted text</button>}</div>
+        {reading && <Sk kind="pages" label={reading} />}
         <input ref={fileRef} type="file" hidden accept="application/pdf,.pdf" onChange={(ev) => { void readPdf(ev.target.files?.[0]); ev.target.value = '' }} />
         {pdf && <div className="pdf-passage-picker"><Field label={`PDF page · ${pdf.name}`}><select className="select" value={pdf.page} onChange={(ev) => { const page = +ev.target.value; setPdf({ ...pdf, page }); setText(''); setLocator(`PDF page ${page}`) }}>{pdf.pages.map((_, i) => <option key={i} value={i + 1}>Page {i + 1}</option>)}</select></Field><textarea className="textarea" ref={pageRef} aria-label="PDF page text" readOnly rows={9} value={pdf.pages[pdf.page - 1]} /><button className="btn ghost sm" onClick={() => { const el = pageRef.current; if (el) { const selection = el.value.slice(el.selectionStart, el.selectionEnd); if (selection.trim()) setText(selection); else setError('Highlight the exact passage in the PDF text first.') } }}>Use highlighted text</button><p className="small muted">Check extracted text against the PDF. Only the selected passage is saved.</p></div>}
         <Field label="Exact source passage"><textarea className="textarea" rows={6} maxLength={12000} readOnly={!!pdf} value={text} onChange={(ev) => setText(ev.target.value)} placeholder="Paste the exact passage, including relevant qualifications." /></Field>

@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '../lib/store'
 import { SEVERITY_COLOR } from '../lib/palette'
 import AssistantDock from './AssistantDock'
@@ -12,6 +12,7 @@ import { useTiltField } from '../lib/tilt'
 import { setRouteOrder, useLinkSwap, useSwapNavigate } from '../lib/swap'
 import DepthStage from './DepthStage'
 import { Portal } from './Portal'
+import { RouteSkeleton } from './Skeleton'
 import { useTheme, type ThemePreference } from '../lib/theme'
 import type { SyncStatus } from '../lib/cloudSync'
 
@@ -344,7 +345,9 @@ export default function Layout() {
           <i className="tb-progress" aria-hidden="true" />
         </div>
         <div className="content">
-          <Outlet />
+          <Suspense fallback={<RouteSkeleton path={loc.pathname} />}>
+            <Outlet />
+          </Suspense>
         </div>
         <footer className="workspace-footer">
           <span>WilliamsLab <span className="footer-slash" aria-hidden="true">/</span> Research OS</span>

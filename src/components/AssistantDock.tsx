@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Sk } from './Skeleton'
 import { useLocation } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Markdown } from './Markdown'
@@ -234,7 +235,7 @@ Be concise and practical. Use markdown (## headings, **bold**, - bullets). Help 
           ) : (
             messages.map((m, i) => (
               <div key={i} className={`ai-msg ${m.role}`}>
-                {m.role === 'assistant' ? (m.content ? <Markdown text={m.content} /> : <span className="typing">…</span>) : m.content}
+                {m.role === 'assistant' ? (m.content ? <Markdown text={m.content} /> : <Sk kind="answer" label="Thinking" />) : m.content}
                 {m.role === 'assistant' && m.sources && m.sources.length > 0 && (
                   <div className="msg-meta">{m.sources.map((s) => <span key={s} className="src-chip">§ {s}</span>)}</div>
                 )}

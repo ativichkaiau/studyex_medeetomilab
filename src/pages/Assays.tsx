@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { Sk } from '../components/Skeleton'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, AssayBadge, SevDot } from '../components/ui'
 import { Modal, Field } from '../components/Modal'
@@ -203,7 +204,7 @@ export default function Assays() {
       {sop && (
         <Modal title={`SOP · ${sop.method}`} onClose={() => { abortRef.current?.abort(); setSop(null) }} wide>
           {sop.error && <div className="err">{sop.error}</div>}
-          {sop.text ? <div className="prose"><Markdown text={sop.text} /></div> : sop.streaming ? <span className="typing">drafting the SOP<span>.</span><span>.</span><span>.</span></span> : !sop.error && <p className="empty">No content.</p>}
+          {sop.text ? <div className="prose"><Markdown text={sop.text} /></div> : sop.streaming ? <Sk kind="protocol" /> : !sop.error && <p className="empty">No content.</p>}
           <div className="form-actions">
             {sop.streaming ? (
               <button className="btn ghost" onClick={() => abortRef.current?.abort()}>Stop</button>

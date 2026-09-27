@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard, HypBadge } from '../components/ui'
 import { Markdown } from '../components/Markdown'
+import { Sk } from '../components/Skeleton'
 import { buildAimsPlan, aimsScaffoldMd, aimsContext } from '../lib/grantAims'
 import { computeMeta, fmt } from '../lib/metaAnalysis'
 import { streamChat, hasKey, getModel, type ChatMessage } from '../lib/openai'
@@ -88,10 +89,10 @@ export default function GrantAims() {
             <StatCard value={`${months} mo`} label="Timeline" sub={`${plan.totalWeeks} weeks`} tone="#ea580c" />
           </div>
 
-          {aiText && (
+          {(aiText || aiOn) && (
             <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--violet, #7c3aed)' } as CSSProperties}>
               <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #7c3aed)' }} />AI-POLISHED SPECIFIC AIMS{aiOn ? ' · streaming…' : ''}</div>
-              <Markdown text={aiText} />
+              {aiText ? <Markdown text={aiText} /> : <Sk kind="aims" parts={plan.aims.map((_, i) => `Aim ${i + 1}`)} />}
             </div>
           )}
 

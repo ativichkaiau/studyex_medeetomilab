@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { collectReferences } from '../lib/references'
 import { evidenceOf, normalizeDoi, validDoi } from '../lib/evidence'
 import { checkPublicationNotices } from '../lib/publicationNotices'
+import { Sk } from './Skeleton'
 
 export function PublicationWatch() {
   const { state, updateResearch } = useStore()
@@ -53,6 +54,7 @@ export function PublicationWatch() {
   return <div className="publication-watch">
     <div className="wrap-gap"><b>Publication watch</b><span className="small muted">{checked}/{dois.length} DOIs checked</span><button className="btn ghost sm" disabled={!!progress || !dois.length} onClick={() => void check(due.length ? due : dois)}>{progress || (due.length ? `Check ${due.length} pending` : 'Refresh notices')}</button>{progress && <button className="btn ghost sm" onClick={() => controller.current?.abort()}>Stop</button>}</div>
     <p className="small muted">Crossref / Retraction Watch. Checks when this view opens; up to 20 due DOIs automatically, cached for 24 hours. No result does not establish that a paper is reliable.{refs.some((r) => !validDoi(r.doi ?? '')) ? ' References without a valid DOI cannot be checked.' : ''}</p>
+    {progress && <Sk kind="notices" label={progress} />}
     {alerts.map((a) => <div className="evidence-warning" key={a.doi}><b>{refs.find((r) => normalizeDoi(r.doi) === a.doi)?.title || e.passages.find((p) => p.doi === a.doi)?.title || a.doi}</b>{a.notices.map((n, i) => <p className="small" key={i}>{n.type} · {n.source}{n.date ? ` · ${n.date}` : ''} — {n.doi && validDoi(n.doi) ? <a href={`https://doi.org/${encodeURIComponent(n.doi)}`} target="_blank" rel="noreferrer">{n.title} ↗</a> : n.title}</p>)}<span className="small">Checked {new Date(a.checkedAt).toLocaleString()}</span></div>)}
     {!!failures.length && <details className="evidence-error"><summary>{failures.length} checks failed — status remains unknown</summary>{failures.map((n) => <p className="small" key={n.doi}>{n.doi}: {n.error} <button className="btn ghost sm" disabled={!!progress} onClick={() => void check([n.doi])}>Retry</button></p>)}</details>}
     {error && <p className="evidence-error" role="alert">{error}</p>}

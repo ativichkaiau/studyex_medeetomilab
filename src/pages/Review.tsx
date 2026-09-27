@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Sk } from '../components/Skeleton'
 import { useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
@@ -190,7 +191,7 @@ function ProjectReview() {
             <div key={i} className={`msg ${m.role}`}>
               {m.role === 'assistant' ? (
                 <>
-                  {m.content ? <Markdown text={m.content} /> : <span className="typing">thinking<span>.</span><span>.</span><span>.</span></span>}
+                  {m.content ? <Markdown text={m.content} /> : <Sk kind="answer" />}
                   {(m.sources?.length || m.usage) && (
                     <div className="msg-meta">
                       {m.sources?.map((s) => <span key={s} className="src-chip" title="From this project's Theory section">§ {s}</span>)}

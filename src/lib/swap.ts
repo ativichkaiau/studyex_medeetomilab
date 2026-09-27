@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getDim } from './dimension'
+import { prefetchRoute } from '../routes'
 
 /**
  * Page swap — in 3D, changing page rolls the old one away on a drum and the
@@ -58,17 +59,27 @@ export function useSwapNavigate() {
   const loc = useLocation()
   const here = useRef(loc.pathname)
   here.current = loc.pathname
-  return useCallback((to: string) => runSwap(here.current, to.split(/[?#]/)[0], () => nav(to)), [nav])
+  return useCallback((to: string) => {
+    const path = to.split(/[?#]/)[0]
+    prefetchRoute(path)
+    runSwap(here.current, path, () => nav(to))
+  }, [nav])
 }
 
 /**
  * Route every in-app link through the swap. Runs in the capture phase, ahead
  * of React Router's own handler, which then sees defaultPrevented and stands
  * down; the link's other onClick handlers (e.g. closing the drawer) still run.
+ * Hovering or focusing a link starts loading its page, so the swap can carry
+ * the page itself.
  */
 export function useLinkSwap() {
   const swapTo = useSwapNavigate()
   useEffect(() => {
+    const onIntent = (e: Event) => {
+      const a = (e.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href^="#/"]')
+      if (a) prefetchRoute(a.getAttribute('href')!.slice(1).split(/[?#]/)[0])
+    }
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       const a = (e.target as Element | null)?.closest?.<HTMLAnchorElement>('a[href^="#/"]')
@@ -77,6 +88,12 @@ export function useLinkSwap() {
       swapTo(a.getAttribute('href')!.slice(1))
     }
     document.addEventListener('click', onClick, true)
-    return () => document.removeEventListener('click', onClick, true)
+    document.addEventListener('pointerover', onIntent, { passive: true })
+    document.addEventListener('focusin', onIntent)
+    return () => {
+      document.removeEventListener('click', onClick, true)
+      document.removeEventListener('pointerover', onIntent)
+      document.removeEventListener('focusin', onIntent)
+    }
   }, [swapTo])
 }

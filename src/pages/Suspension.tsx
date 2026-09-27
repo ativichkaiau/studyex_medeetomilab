@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Sk } from '../components/Skeleton'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -196,7 +197,7 @@ export default function Suspension() {
             {aiStreaming ? <button className="icon-btn" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="icon-btn" onClick={() => setAiText('')}>Dismiss</button>}
           </div>
           {aiError && <div className="err">{aiError}</div>}
-          {aiText ? <Markdown text={aiText} /> : aiStreaming && <span className="typing">reviewing<span>.</span><span>.</span><span>.</span></span>}
+          {aiText ? <Markdown text={aiText} /> : aiStreaming && <Sk kind="audit" />}
         </div>
       )}
 

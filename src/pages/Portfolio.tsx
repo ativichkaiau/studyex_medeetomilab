@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useSwapNavigate } from '../lib/swap'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { computeInstabilities, stabilityScore } from '../lib/suspension'
@@ -28,7 +28,7 @@ const BLANK = { name: '', code: '', question: '' }
 
 export default function Portfolio() {
   const { allProjects, activeId, switchProject, createProject, patchProjectById, deleteProject } = useStore()
-  const nav = useNavigate()
+  const nav = useSwapNavigate()
   const rows = useMemo(() => allProjects.map((p) => ({ p, m: metrics(p) })), [allProjects])
   const [editing, setEditing] = useState(false)
   const [adding, setAdding] = useState(false)

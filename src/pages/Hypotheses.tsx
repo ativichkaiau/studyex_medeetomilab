@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { Sk } from '../components/Skeleton'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, HypBadge, SevDot } from '../components/ui'
 import { Modal, Field } from '../components/Modal'
@@ -202,7 +203,7 @@ export default function Hypotheses() {
                 <div className="hyp-critique">
                   <div className="hc-head"><span className="mono small">✦ AI CRITIQUE</span>{!c.streaming && <button className="he-x" onClick={() => setCrit((cc) => ({ ...cc, [h.id]: { text: '', streaming: false } }))}>✕</button>}</div>
                   {c.error && <div className="err">{c.error}</div>}
-                  {c.text ? <Markdown text={c.text} /> : c.streaming && <span className="typing">pressure-testing<span>.</span><span>.</span><span>.</span></span>}
+                  {c.text ? <Markdown text={c.text} /> : c.streaming && <Sk kind="critique" />}
                 </div>
               )}
 

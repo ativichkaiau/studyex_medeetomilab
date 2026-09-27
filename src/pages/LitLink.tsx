@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useSwapNavigate } from '../lib/swap'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { Markdown } from '../components/Markdown'
+import { Sk } from '../components/Skeleton'
 import { useLitLink, cohortStats, exportCohortMd, PHASES, OUTCOME_META, type LitGroup, type GroupOutcome, type PhaseStatus } from '../lib/litlink'
 import { streamChat, hasKey, getModel, type ChatMessage } from '../lib/openai'
 
@@ -148,7 +149,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
   const set = (patch: Partial<LitGroup>) => ll.patchGroup(g.id, patch)
 
   const { createProject, switchProject } = useStore()
-  const nav = useNavigate()
+  const nav = useSwapNavigate()
   const [ai, setAi] = useState<{ kind: 'reading' | 'critique'; text: string; on: boolean } | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -240,7 +241,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
               {ai.on ? <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn ghost sm" onClick={() => setAi(null)}>Dismiss</button>}
             </span>
           </div>
-          <Markdown text={ai.text || '_…_'} />
+          {ai.on && !ai.text ? <Sk kind={ai.kind === 'reading' ? 'reading' : 'finer'} /> : <Markdown text={ai.text} />}
         </div>
       )}
 

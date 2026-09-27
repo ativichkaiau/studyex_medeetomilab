@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { Modal } from '../components/Modal'
+import { Sk } from '../components/Skeleton'
 import { fetchByPmids, fetchAbstract } from '../lib/pubmed'
 import { listSearches } from '../lib/savedSearches'
 import { taStatus, cohenKappa, kappaLabel, advanced, derivePrisma, type TaStatus } from '../lib/screening'
@@ -139,8 +140,9 @@ export default function Screening() {
                   </div>
                   {rec.abstract ? (
                     <p className="sr-abstract">{rec.abstract}</p>
-                  ) : rec.pmid && (
-                    <button className="sr-loadabs" onClick={() => loadAbstract(rec)} disabled={busyAbstract.has(rec.id)}>{busyAbstract.has(rec.id) ? 'loading abstract…' : '+ load abstract'}</button>
+                  ) : rec.pmid && (busyAbstract.has(rec.id)
+                    ? <Sk kind="abstract" />
+                    : <button className="sr-loadabs" onClick={() => loadAbstract(rec)}>+ load abstract</button>
                   )}
                 </div>
                 <div className="sr-actions">
@@ -171,6 +173,7 @@ export default function Screening() {
         <Modal title="Add records to screen" onClose={() => setAdding(null)}>
           <p className="small" style={{ marginBottom: 12 }}>Paste PubMed IDs (one per line, or comma/space-separated). Titles and journals are fetched from PubMed; abstracts load on demand while you screen.</p>
           <textarea className="textarea" rows={7} style={{ width: '100%' }} placeholder={'29202755\n33910361\n22706305'} value={adding.text} onChange={(e) => setAdding({ ...adding, text: e.target.value })} />
+          {adding.loading && <div style={{ marginTop: 12 }}><Sk kind="records" /></div>}
           {adding.error && <div className="err" style={{ marginTop: 12, marginBottom: 0 }}>{adding.error}</div>}
           <div className="form-actions">
             <button className="btn ghost" onClick={() => addPmids(true)} disabled={adding.loading}>Pull from saved searches</button>
