@@ -323,11 +323,12 @@ export default function Layout() {
               type="button"
               className="toggle dim-toggle"
               onClick={toggleDim}
+              aria-label="3D interface"
               aria-pressed={dim === '3d'}
               title={dim === '3d' ? 'Flatten to 2D (⇧D)' : 'Stand up in 3D (⇧D)'}
             >
               <span className="dim-cube" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
-              {dim === '3d' ? '3D' : '2D'}
+              <span className="dim-label">{dim === '3d' ? '3D' : '2D'}</span>
             </button>
             <select
               className="toggle theme-select"
