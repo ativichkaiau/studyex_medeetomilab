@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
 import { Sk } from '../components/Skeleton'
+import RadarScope, { type ScopeContact } from '../components/RadarScope'
 import { searchPubmed, type PubmedHit } from '../lib/pubmed'
 import { searchSources, crossrefByDoi, ALL_SOURCES, type SourceHit, type SourceName } from '../lib/sources'
 import { complete, parseJsonLoose, hasKey, getModel, type JsonSchemaResponseFormat } from '../lib/openai'
@@ -301,6 +302,36 @@ export default function Radar() {
     triagedIncludes.forEach(toStudies)
   }
 
+  // every result from every search on this page, as radar contacts (3D only);
+  // keys are the ids of their rows below, so a contact can point at its row
+  const contacts = useMemo(() => {
+    const out: ScopeContact[] = []
+    const seenPmids = new Set<string>()
+    for (const h of hits) {
+      seenPmids.add(h.pmid)
+      out.push({ key: `hit-${h.pmid}`, title: h.title, year: h.year, source: 'PubMed', verdict: triage[h.pmid]?.verdict, fresh: fresh.has(h.pmid) })
+    }
+    // the living list shows its first 12, so the scope does too — every blip has a row
+    for (const h of living.newHits.slice(0, 12)) {
+      if (seenPmids.has(h.pmid)) continue
+      seenPmids.add(h.pmid)
+      out.push({ key: `lhit-${h.pmid}`, title: h.title, year: h.year, source: 'PubMed', fresh: true })
+    }
+    for (const h of msHits) {
+      if (h.pmid && seenPmids.has(h.pmid)) continue
+      out.push({ key: `mhit-${h.key}`, title: h.title, year: h.year, source: h.sources[0] ?? 'PubMed' })
+    }
+    return out
+  }, [hits, triage, fresh, living.newHits, msHits])
+  const findContact = (id: string) => {
+    const row = document.getElementById(id)
+    if (!row) return
+    row.scrollIntoView({ block: 'center' })
+    row.classList.remove('flash')
+    void row.offsetWidth
+    row.classList.add('flash')
+  }
+
   return (
     <>
       <div className="page-head">
@@ -309,6 +340,8 @@ export default function Radar() {
         <h1>Literature Radar</h1>
         <p>Search PubMed live, triage hits for the review with AI, link them to a hypothesis, and send them straight into the SRMA extraction table. Saved searches flag what's new since you last looked.</p>
       </div>
+
+      <RadarScope contacts={contacts} sources={ALL_SOURCES} onPick={findContact} />
 
       <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--green)' } as CSSProperties}>
         <div className="card-h" style={{ justifyContent: 'space-between' }}>
@@ -339,7 +372,7 @@ export default function Radar() {
                     <button className="btn ghost sm" onClick={addNewToScreening}>→ Add all to Screening</button>
                   </div>
                   {living.newHits.slice(0, 12).map((h) => (
-                    <div key={h.pmid} className="stint" style={{ alignItems: 'flex-start' }}>
+                    <div key={h.pmid} id={`lhit-${h.pmid}`} className="stint" style={{ alignItems: 'flex-start' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="nm"><span className="new-dot">NEW</span>{h.title}</div>
                         <div className="meta">{h.journal ?? '—'} {h.year ?? ''} · <a href={`https://pubmed.ncbi.nlm.nih.gov/${h.pmid}/`} target="_blank" rel="noreferrer">PMID {h.pmid} ↗</a> · from “{h.search.length > 40 ? h.search.slice(0, 38) + '…' : h.search}”</div>
@@ -396,7 +429,7 @@ export default function Radar() {
               {hits.map((h) => {
                 const tv = triage[h.pmid]
                 return (
-                  <div key={h.pmid} className="stint" style={{ alignItems: 'flex-start' }}>
+                  <div key={h.pmid} id={`hit-${h.pmid}`} className="stint" style={{ alignItems: 'flex-start' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="nm">
                         {fresh.has(h.pmid) && <span className="new-dot" title="New since last run">NEW</span>}
@@ -461,7 +494,7 @@ export default function Radar() {
             {msMeta.errors.length > 0 && <p className="small" style={{ color: 'var(--amber)', marginTop: 6 }}>⚠ {msMeta.errors.map((e) => `${e.source}: ${e.msg}`).join('; ')}</p>}
             <div style={{ marginTop: 12 }}>
               {msHits.map((h) => (
-                <div key={h.key} className="stint" style={{ alignItems: 'flex-start' }}>
+                <div key={h.key} id={`mhit-${h.key}`} className="stint" style={{ alignItems: 'flex-start' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="nm">
                       {h.sources.map((s) => <span key={s} className="src-badge" style={{ background: SRC_COLOR[s] }} title={s}>{SRC_ABBR[s]}</span>)}

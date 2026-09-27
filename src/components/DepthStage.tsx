@@ -37,12 +37,19 @@ export default function DepthStage() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
     let raf = 0
     let sway = 0
+    let spot: [number, number] | null = null
 
     const frame = () => {
       raf = 0
       const still = reduce.matches
       el.style.setProperty('--floor-y', `${still ? 0 : (window.scrollY * 0.55).toFixed(1)}px`)
       el.style.setProperty('--sway', `${still ? 0 : sway.toFixed(1)}px`)
+      // a work light that follows the pointer through the gaps between slabs
+      if (spot) {
+        el.style.setProperty('--spot-x', `${spot[0].toFixed(0)}px`)
+        el.style.setProperty('--spot-y', `${spot[1].toFixed(0)}px`)
+        el.style.setProperty('--spot-on', '1')
+      }
     }
     const schedule = () => {
       if (document.hidden) frame()
@@ -50,16 +57,23 @@ export default function DepthStage() {
     }
     const onMove = (e: PointerEvent) => {
       sway = (e.clientX / (window.innerWidth || 1) - 0.5) * -70
+      if (e.pointerType === 'mouse') spot = [e.clientX, e.clientY]
       schedule()
+    }
+    const onLeave = () => {
+      spot = null
+      el.style.setProperty('--spot-on', '0')
     }
 
     frame()
     window.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('pointermove', onMove, { passive: true })
+    document.documentElement.addEventListener('pointerleave', onLeave)
     reduce.addEventListener('change', schedule)
     return () => {
       window.removeEventListener('scroll', schedule)
       window.removeEventListener('pointermove', onMove)
+      document.documentElement.removeEventListener('pointerleave', onLeave)
       reduce.removeEventListener('change', schedule)
       if (raf) cancelAnimationFrame(raf)
     }
@@ -72,6 +86,7 @@ export default function DepthStage() {
       <div className="depth-track" />
       <div className="depth-horizon" />
       <canvas ref={gl} className="depth-gl" />
+      <div className="depth-spot" />
     </div>
   )
 }

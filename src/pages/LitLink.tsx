@@ -82,7 +82,7 @@ export default function LitLink() {
       </div>
 
       {/* phase pipeline */}
-      <div className="grid g3" style={{ marginBottom: 16 }}>
+      <div className="grid g3 lit-phases" style={{ marginBottom: 16 }}>
         {PHASES.map((p, i) => (
           <div className="card lg" key={p.key} style={{ borderTop: `3px solid ${p.accent}` }}>
             <div className="card-h" style={{ justifyContent: 'space-between' }}>

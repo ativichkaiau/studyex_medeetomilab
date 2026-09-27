@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { collectReferences, toBibtex, toRis, vancouver } from '../lib/references'
+import { Bookshelf } from '../components/Solids'
 
 function download(content: string, name: string, type: string) {
   const blob = new Blob([content], { type })
@@ -35,6 +36,19 @@ export default function References() {
 
   const withDoi = refs.filter((r) => r.doi).length
   const inBoth = refs.filter((r) => r.kind === 'both').length
+
+  // the shelf's books point into the table: clear any filter, bring the row up, flash it
+  const findRow = (id: string) => {
+    setQ('')
+    requestAnimationFrame(() => {
+      const row = document.getElementById(`ref-${id}`)
+      if (!row) return
+      row.scrollIntoView({ block: 'center' })
+      row.classList.remove('flash')
+      void row.offsetWidth
+      row.classList.add('flash')
+    })
+  }
 
   return (
     <>
@@ -69,6 +83,8 @@ export default function References() {
             <StatCard value={withDoi} label="With DOI" sub={`${refs.filter((r) => r.pmid).length} with PMID`} tone="#ea580c" />
           </div>
 
+          <Bookshelf refs={refs} onPick={findRow} />
+
           <div className="card lg">
             <div className="card-h" style={{ justifyContent: 'space-between' }}>
               <span><span className="sq" style={{ background: 'var(--blue)' }} />LIBRARY · {shown.length} of {refs.length}</span>
@@ -81,7 +97,7 @@ export default function References() {
                 </thead>
                 <tbody>
                   {shown.map((r, i) => (
-                    <tr key={r.id}>
+                    <tr key={r.id} id={`ref-${r.id}`}>
                       <td className="mono" style={{ whiteSpace: 'nowrap', color: 'var(--blue)' }}>@{r.citeKey}</td>
                       <td>
                         <div>{vancouver(r, refs.indexOf(r) + 1).replace(/^\d+\.\s/, '')}</div>

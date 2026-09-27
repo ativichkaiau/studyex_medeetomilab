@@ -94,3 +94,127 @@ html[data-card-swap="include"]::view-transition-old(card-swap):only-child{animat
 html[data-card-swap="exclude"]::view-transition-old(card-swap):only-child{animation:card-exclude .55s cubic-bezier(.55,0,.75,.2) both}
 html[data-card-swap]:is([data-card-swap="maybe"],[data-card-swap="clear"])::view-transition-old(card-swap):only-child{animation:card-aside .5s cubic-bezier(.55,0,.75,.2) both}
 html[data-card-swap]::view-transition-group(card-swap){animation-duration:.4s}
+
+/* ---------- LitLink: the three phases as a folding screen on a track ----------
+   Foundations and Synthesis angle in toward the middle like the wings of a
+   triptych; whichever you point at turns to face you. Underneath, the livery
+   runs from phase one to phase three like lanes on a track. Three across
+   only — stacked on narrow screens they stay flat. */
+@media(min-width:1001px){
+  html[data-dim="3d"] .lit-phases{position:relative; perspective:1700px; padding-bottom:30px}
+  html[data-dim="3d"] .lit-phases > .card{position:relative; z-index:1; transition:transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .3s}
+  html[data-dim="3d"] .lit-phases > .card:first-child{transform-origin:100% 50%; transform:rotateY(16deg)}
+  html[data-dim="3d"] .lit-phases > .card:last-child{transform-origin:0 50%; transform:rotateY(-16deg)}
+  html[data-dim="3d"] .lit-phases > .card:is(:hover,:focus-within){transform:none}
+  html[data-dim="3d"] .lit-phases::after{content:""; position:absolute; left:1%; right:1%; bottom:0; height:130px; z-index:0; pointer-events:none;
+    transform-origin:50% 100%; transform:perspective(900px) rotateX(74deg);
+    background:
+      linear-gradient(90deg, transparent, var(--navy) 5%, var(--navy) 95%, transparent) 0 26%/100% 6px no-repeat,
+      linear-gradient(90deg, transparent, var(--red) 5%, var(--red) 95%, transparent) 0 50%/100% 6px no-repeat,
+      linear-gradient(90deg, transparent, var(--yellow) 5%, var(--yellow) 95%, transparent) 0 74%/100% 6px no-repeat;
+    opacity:.55; -webkit-mask-image:linear-gradient(to top, #000 20%, transparent); mask-image:linear-gradient(to top, #000 20%, transparent)}
+}
+
+/* ---------- Solids (components/Solids.tsx): a page's numbers stood up as objects ----------
+   Each solid is one element and its two pseudo-elements: the element is the
+   front face, ::before the top (hinged back from the top edge), ::after the
+   right side (hinged back from the right edge). The scene is turned so all
+   three show. */
+
+/* References: the shelf */
+.shelf-scene{perspective:1300px; perspective-origin:50% 10%; overflow-x:auto; padding:30px 6px 10px; scrollbar-width:thin}
+.shelf{position:relative; width:max-content; min-width:100%; transform-style:preserve-3d; transform-origin:50% 100%; transform:rotateX(-9deg) rotateY(-9deg)}
+.shelf-row{display:flex; align-items:flex-end; gap:2px; padding:0 22px; min-height:220px; transform-style:preserve-3d}
+.book{--d:104px; position:relative; flex:none; width:var(--t); height:var(--h); padding:34px 0 0; border:0; border-radius:3px 3px 1px 1px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:space-between; color:#fff; transform-style:preserve-3d;
+  background:
+    linear-gradient(transparent 20px, var(--band) 20px 25px, transparent 25px calc(100% - 30px), var(--band) calc(100% - 30px) calc(100% - 27px), transparent calc(100% - 27px)),
+    linear-gradient(90deg, rgba(0,0,0,.3), rgba(255,255,255,.1) 22%, transparent 48%, rgba(0,0,0,.24)),
+    var(--spine);
+  transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.book::before{content:""; position:absolute; left:0; top:0; width:100%; height:var(--d); transform-origin:0 0; transform:rotateX(-90deg);
+  background:repeating-linear-gradient(90deg, #f6f1e4 0 2px, #e3dccb 2px 3px); box-shadow:inset 3px 0 0 var(--spine), inset -3px 0 0 var(--spine)}
+.book::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:rotateY(90deg);
+  background:linear-gradient(90deg, rgba(0,0,0,.25), transparent 30%), var(--spine)}
+.book.k-paper{--spine:#0a1f6b; --band:#ffcc00}
+.book.k-study{--spine:#0b7a70; --band:#dff5f1}
+.book.k-both{--spine:#5b21b6; --band:#ffcc00}
+.book:is(:hover,:focus-visible){transform:translateZ(36px) rotateY(-16deg)}
+.book:focus-visible{outline:2px solid var(--yellow); outline-offset:3px}
+.spine-key{writing-mode:vertical-rl; font:700 10px var(--mono); letter-spacing:.06em; max-height:calc(var(--h) - 84px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.spine-year{font:700 9.5px var(--mono); padding:0 0 8px; opacity:.9}
+.shelf-board{position:relative; height:16px; transform-style:preserve-3d;
+  background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#e9edf5, #c9d1df)}
+.shelf-board::before{content:""; position:absolute; left:0; top:0; width:100%; height:120px; transform-origin:0 0; transform:rotateX(-90deg);
+  background:linear-gradient(to bottom, #dfe5ef, #f4f6fa)}
+html[data-theme="night"] .shelf-board{background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#2a3140, #171b24)}
+html[data-theme="night"] .shelf-board::before{background:linear-gradient(to bottom, #1c2230, #262d3b)}
+tr.flash > td{animation:row-flash 1.6s ease-out}
+@keyframes row-flash{from{background:color-mix(in srgb, var(--yellow) 42%, transparent)}}
+
+/* PRISMA: the tower */
+.tower-scene{perspective:1100px; perspective-origin:40% 0; padding:36px 0 22px; display:flex; justify-content:center; overflow:hidden}
+/* narrow enough that the set-aside slabs, drawn at the same scale, fit beside it */
+.tower{width:min(340px, 42%); transform-style:preserve-3d; transform:rotateX(-24deg) rotateY(-26deg); margin-right:40%}
+@media(prefers-reduced-motion:no-preference){
+  .tower{animation:tower-turn 16s ease-in-out infinite alternate}
+  .tower-scene:hover .tower{animation-play-state:paused}
+}
+@keyframes tower-turn{from{transform:rotateX(-24deg) rotateY(-34deg)} to{transform:rotateX(-22deg) rotateY(-16deg)}}
+.tier{position:relative; display:flex; justify-content:center; transform-style:preserve-3d; margin-bottom:16px}
+.solid{--d:84px; position:relative; min-width:84px; height:42px; display:flex; align-items:center; justify-content:center; gap:8px; padding:0 10px;
+  color:#fff; white-space:nowrap; transform-style:preserve-3d; background:var(--face); box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.solid::before{content:""; position:absolute; left:0; top:0; width:100%; height:var(--d); transform-origin:0 0; transform:rotateX(-90deg); background:var(--top)}
+.solid::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:rotateY(90deg); background:var(--side)}
+.solid b{font:800 15px var(--mono)}
+.solid span{font:600 9px var(--mono); letter-spacing:.12em; text-transform:uppercase; opacity:.85}
+.tier.t0 .keep{--face:#0a1f6b; --top:#23408f; --side:#061446}
+.tier.t1 .keep{--face:#1746d1; --top:#4a70e6; --side:#0e33a3}
+.tier.t2 .keep{--face:#6d3fd6; --top:#8e68ea; --side:#4f25b0}
+.tier.t3 .keep{--face:#0f9d6b; --top:#35bf8c; --side:#0a7550}
+.solid.out{--face:#e2001a; --top:#f2465a; --side:#a30012; position:absolute; bottom:0; left:calc(100% + 16px); transform:translateZ(-18px)}
+.tier .keep{position:relative}
+/* each excluded slab hangs off its own stage */
+.tier{justify-content:flex-start}
+.tier .keep{margin-left:auto; margin-right:auto}
+.tier .keep + .solid.out{left:auto; right:0; translate:calc(100% + 16px) 0}
+
+/* Dashboard: research axes as columns */
+.axis-cols{display:flex; align-items:flex-end; gap:24px; padding:22px 10px 8px; margin:0 0 12px; overflow-x:auto; perspective:900px; perspective-origin:50% 0}
+.axis-col{display:flex; flex-direction:column; align-items:center; gap:6px; flex:none; width:66px}
+.column{--d:26px; position:relative; width:30px; height:110px; margin:8px 0 10px; transform-style:preserve-3d; transform:rotateX(-18deg) rotateY(-32deg);
+  border:1px dashed color-mix(in srgb, var(--blue) 50%, transparent); background:color-mix(in srgb, var(--blue) 5%, transparent)}
+.column::before,.column .fill::before{content:""; position:absolute; left:0; top:0; width:100%; height:var(--d); transform-origin:0 0; transform:rotateX(-90deg)}
+.column::after,.column .fill::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:rotateY(90deg)}
+.column::before{border:1px dashed color-mix(in srgb, var(--blue) 40%, transparent)}
+.column::after{border:1px dashed color-mix(in srgb, var(--blue) 40%, transparent); background:color-mix(in srgb, var(--blue) 4%, transparent)}
+.column .fill{position:absolute; left:0; right:0; bottom:0; height:calc(var(--pct) * 100%); transform-style:preserve-3d; background:#1746d1}
+.column .fill::before{background:#4a70e6}
+.column .fill::after{background:#0e33a3}
+.axis-col-label{font:600 9.5px var(--mono); text-align:center; max-width:66px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted)}
+.axis-col-v{font:700 10.5px var(--mono); color:var(--ink)}
+
+/* ---------- Literature: the radar scope (gl/radar.ts) ----------
+   An instrument, so dark in either theme like the Overview monitor. */
+.radar-card{margin-bottom:16px}
+.radar-scope{position:relative; height:clamp(280px, 34vw, 380px); border-radius:var(--radius-sm); overflow:hidden;
+  background:radial-gradient(80% 90% at 50% 55%, #0b1a4a, #040a1c 70%); border:1px solid #13235e; box-shadow:inset 0 0 50px rgba(18,214,143,.08)}
+.radar-scope canvas{position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:pan-y; outline:none}
+.radar-scope canvas:active{cursor:grabbing}
+.radar-scope canvas:focus-visible{outline:2px solid #12d68f; outline-offset:-2px}
+.rs-labels{position:absolute; inset:0; pointer-events:none}
+.rs-labels > span{position:absolute; left:0; top:0; white-space:nowrap; will-change:transform}
+.rs-sector{translate:-50% -50%; font:700 9.5px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:rgba(200,214,255,.82)}
+.rs-sector b{margin-left:6px; color:#ffcc00}
+.rs-ring{translate:5px -50%; font:600 9px var(--mono); color:rgba(160,190,255,.6)}
+.rs-tip{translate:-50% calc(-100% - 12px); max-width:340px; white-space:normal !important; padding:6px 9px; border-radius:8px; font:600 11.5px/1.35 var(--sans); color:#fff;
+  background:rgba(4,10,28,.92); border:1px solid rgba(96,138,255,.35); box-shadow:0 10px 24px -12px rgba(0,0,0,.7); opacity:0; transition:opacity .15s}
+.rs-empty{position:absolute; left:50%; bottom:14px; translate:-50% 0; width:90%; margin:0; text-align:center; font:500 10.5px var(--mono); letter-spacing:.06em; color:rgba(200,214,255,.62)}
+.rs-legend{display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; font:600 9.5px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.rs-legend i{width:8px; height:8px; border-radius:50%; margin-left:6px}
+.rs-legend .lg-include{background:#12d68f}
+.rs-legend .lg-maybe{background:#ffb020}
+.rs-legend .lg-exclude{background:#ff3b52}
+.rs-legend .lg-none{background:#5ad1ff}
+.stint.flash{animation:row-flash 1.6s ease-out}
+@media(max-width:620px){.rs-legend{display:none}}
