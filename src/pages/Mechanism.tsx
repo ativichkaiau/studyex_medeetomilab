@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useStore } from '../lib/store'
-import GraphView, { type GraphHandle } from '../components/GraphView'
+import { type GraphHandle } from '../components/GraphView'
+import GraphStage from '../components/GraphStage'
 import { Kicker, Rule } from '../components/ui'
 import { EVIDENCE_STYLE, nodeColor } from '../lib/palette'
 import { suggestAssay } from '../lib/assayPlanner'
@@ -87,7 +88,7 @@ export default function Mechanism() {
 
       <div className="graph-wrap">
         <div>
-          <GraphView ref={graphRef} nodes={nodes} edges={edges} selectedId={sel?.id} onSelect={setSel} onNodeMove={(id, x, y) => updateNode(id, { x, y })} highlightNodes={highlight.nodes} highlightEdges={highlight.edges} />
+          <GraphStage ref={graphRef} nodes={nodes} edges={edges} selectedId={sel?.id} onSelect={setSel} onNodeMove={(id, x, y) => updateNode(id, { x, y })} highlightNodes={highlight.nodes} highlightEdges={highlight.edges} />
           <div className="card" style={{ marginTop: 12 }}>
             <div className="legend-row">
               {(Object.keys(EVIDENCE_STYLE) as Evidence[]).map((k) => (

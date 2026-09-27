@@ -345,7 +345,7 @@ function TheoryReader({ sections, curated }: { sections: { id: string; title: st
             {visible.map((s) => {
               const n = sections.findIndex((t) => t.id === s.id) + 1
               return (
-                <section key={s.id} id={s.id} className="theory-sec">
+                <section key={s.id} id={s.id} className={`theory-sec${active === s.id ? ' is-reading' : ''}`}>
                   <div className="sec-head">
                     <h2><span className="no">{String(n).padStart(2, '0')}</span>{s.title}</h2>
                     <button className={`read-toggle${read.has(s.id) ? ' on' : ''}`} onClick={() => toggle(s.id)}>

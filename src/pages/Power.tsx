@@ -7,6 +7,8 @@ import {
   logRankPower, requiredEvents, fdrAlpha, dFromMeta, assayPowerReport, fmtAlpha,
 } from '../lib/power'
 import { computeMeta, measureInfo } from '../lib/metaAnalysis'
+import PowerSurface from '../components/PowerSurface'
+import type { SurfaceData } from '../gl/powerSurface'
 
 type Design = 'two' | 'paired' | 'anova' | 'survival'
 const DESIGNS: { id: Design; label: string; unit: string }[] = [
@@ -77,6 +79,30 @@ export default function Power() {
     return { ...m, pts }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [design, d, f, k, hr, alpha, alloc, maxN, step])
+
+  // in 3D: the whole surface these curves are slices of — n across, the
+  // effect from half to one-and-a-half times the assumption, deep
+  const surface = useMemo<SurfaceData>(() => {
+    const nx = 44
+    const ny = 26
+    const nMin = 2
+    const multMin = 0.5
+    const multMax = 1.5
+    const nAt = (i: number) => nMin + (i / (nx - 1)) * (maxN - nMin)
+    const grid = new Float32Array(nx * ny)
+    for (let j = 0; j < ny; j++) {
+      const m = multMin + (j / (ny - 1)) * (multMax - multMin)
+      for (let i = 0; i < nx; i++) grid[j * nx + i] = powerAtN(nAt(i), m)
+    }
+    const SLICE: Record<string, string> = { '+25%': '#12b981', planned: '#2f6bff', '−25%': '#e2001a' }
+    return {
+      nx, ny, power: grid, nMin, nMax: maxN, multMin, multMax, target,
+      slices: mults.map((m) => ({ mult: m.mult, color: SLICE[m.label], power: Float32Array.from({ length: nx }, (_, i) => powerAtN(nAt(i), m.mult)) })),
+      current: { n, power },
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [design, d, f, k, hr, alpha, alloc, maxN, target, n])
+  const surfaceSummary = `Power surface for the ${DESIGNS.find((x) => x.id === design)!.label.toLowerCase()} design: power rises with ${unit} and with effect size. At the assumed effect, ${n} ${unit} gives ${Math.round(power * 100)}% power${Number.isFinite(req) ? `; ${Math.round(target * 100)}% power needs ${req}` : ''}.`
 
   const W = 460
   const H = 200
@@ -209,6 +235,8 @@ export default function Power() {
           <p className="small" style={{ marginTop: 6 }}>α={fmtAlpha(alpha)}{correction !== 'none' ? ` (${correction === 'fdr' ? 'FDR' : 'Bonferroni'}, ${tests.toLocaleString()} tests)` : ''}. Dashed = ±25% on the assumed effect — how fragile the plan is to your effect guess.</p>
         </div>
       </div>
+
+      <PowerSurface data={surface} unit={unit} required={req} summary={surfaceSummary} />
 
       <div className="card" style={{ padding: 0 }}>
         <div className="tbl-scroll" style={{ border: 'none' }}>

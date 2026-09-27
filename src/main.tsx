@@ -7,6 +7,7 @@ import './index.css'
 import './evidence.css'
 import './depth.css'
 import './skeleton.css'
+import './signatures.css'
 
 // HashRouter keeps routing in the URL fragment (e.g. /#/graph), so a full
 // reload of any route always serves index.html — no server rewrite needed

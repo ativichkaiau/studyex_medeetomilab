@@ -4,6 +4,7 @@ import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { Modal } from '../components/Modal'
 import { Sk } from '../components/Skeleton'
+import { cardSwap } from '../lib/swap'
 import { fetchByPmids, fetchAbstract } from '../lib/pubmed'
 import { listSearches } from '../lib/savedSearches'
 import { taStatus, cohenKappa, kappaLabel, advanced, derivePrisma, type TaStatus } from '../lib/screening'
@@ -148,7 +149,7 @@ export default function Screening() {
                 <div className="sr-actions">
                   <div className="sr-decide">
                     {(['include', 'maybe', 'exclude'] as ScreenDecision[]).map((d) => (
-                      <button key={d} className={`sr-d ${DEC_CLASS[d]}${mine === d ? ' on' : ''}`} onClick={() => patch(rec.id, { [reviewer]: mine === d ? undefined : d })}>{d}</button>
+                      <button key={d} className={`sr-d ${DEC_CLASS[d]}${mine === d ? ' on' : ''}`} onClick={(e) => cardSwap(e.currentTarget.closest('.screen-rec'), mine === d ? 'clear' : d, () => patch(rec.id, { [reviewer]: mine === d ? undefined : d }))}>{d}</button>
                     ))}
                   </div>
                   {other && <div className="sr-other">R{reviewer === 'd1' ? '2' : '1'}: <span className={`vbadge ${DEC_CLASS[other]}`}>{other}</span></div>}

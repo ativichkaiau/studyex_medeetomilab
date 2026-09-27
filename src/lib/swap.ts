@@ -53,6 +53,29 @@ export function runSwap(from: string, to: string, go: () => void) {
   })
 }
 
+/**
+ * One card's moment, when a decision changes it: in 3D the card flies off if
+ * the change takes it out of the list (a screening record leaving its
+ * filter), or turns over to show its new state if it stays (a finding
+ * resolved, a hypothesis re-graded). signatures.css animates it by `kind`;
+ * the rest of the page holds still. Plain update wherever a page swap
+ * wouldn't run.
+ */
+export function cardSwap(el: Element | null, kind: string, update: () => void) {
+  if (!(el instanceof HTMLElement) || !canSwap() || document.documentElement.dataset.pageSwap) {
+    update()
+    return
+  }
+  const root = document.documentElement
+  el.style.setProperty('view-transition-name', 'card-swap')
+  root.dataset.cardSwap = kind
+  const t = (document as TransitionDoc).startViewTransition!(() => flushSync(update))
+  t.finished.finally(() => {
+    delete root.dataset.cardSwap
+    el.style.removeProperty('view-transition-name')
+  })
+}
+
 /** navigate() that swaps in 3D. */
 export function useSwapNavigate() {
   const nav = useNavigate()

@@ -15,6 +15,8 @@ export interface GraphHandle {
   fit: () => void
   exportSvg: () => void
   exportPng: () => void
+  /** where every node sits right now (the layered 3D view starts from here) */
+  positions: () => Record<string, { x: number; y: number }>
 }
 
 interface Props {
@@ -351,7 +353,7 @@ const GraphView = forwardRef<GraphHandle, Props>(function GraphView(
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(s)))
   }
 
-  useImperativeHandle(ref, () => ({ forceLayout, clusterLayout, layeredLayout, tidy, fit: () => fit(), exportSvg, exportPng }))
+  useImperativeHandle(ref, () => ({ forceLayout, clusterLayout, layeredLayout, tidy, fit: () => fit(), exportSvg, exportPng, positions: () => ({ ...pos }) }))
 
   // frame all nodes on first mount
   useEffect(() => {

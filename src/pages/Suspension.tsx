@@ -10,6 +10,7 @@ import { streamChat, hasKey, getModel, type ChatMessage } from '../lib/openai'
 import { AMSTAR_ITEMS, amstarRating, AMSTAR_COLOR, type AmstarAnswer } from '../lib/amstar'
 import { appendAudit, getAudit, recordScore, getTrend } from '../lib/rigorLog'
 import type { Severity } from '../types'
+import { cardSwap } from '../lib/swap'
 
 function sevRank(s: Severity) {
   return s === 'high' ? 3 : s === 'med' ? 2 : 1
@@ -47,12 +48,15 @@ export default function Suspension() {
   }, [pid, stability])
 
   function applyStatus(id: string, action: 'acknowledged' | 'resolved' | 'open', label: string, noteText?: string) {
-    setInstabilityStatus(id, action)
-    if (action !== 'open') appendAudit(pid, { ts: Date.now(), findingId: id, label, action, note: noteText?.trim() || undefined })
-    else appendAudit(pid, { ts: Date.now(), findingId: id, label, action: 'reopened' })
-    setBump((b) => b + 1)
-    setResolving(null)
-    setNote('')
+    // in 3D the finding turns over to show its new state
+    cardSwap(document.querySelector(`[data-finding="${CSS.escape(id)}"]`), 'flip', () => {
+      setInstabilityStatus(id, action)
+      if (action !== 'open') appendAudit(pid, { ts: Date.now(), findingId: id, label, action, note: noteText?.trim() || undefined })
+      else appendAudit(pid, { ts: Date.now(), findingId: id, label, action: 'reopened' })
+      setBump((b) => b + 1)
+      setResolving(null)
+      setNote('')
+    })
   }
 
   const amstar = state.review.amstar ?? {}
@@ -203,7 +207,7 @@ export default function Suspension() {
 
       <div className="findings">
         {sorted.map((i) => (
-          <div className="finding" key={i.id} style={{ borderLeftColor: SEVERITY_COLOR[i.severity], opacity: i.status !== 'open' ? 0.5 : 1 }}>
+          <div className="finding" key={i.id} data-finding={i.id} style={{ borderLeftColor: SEVERITY_COLOR[i.severity], opacity: i.status !== 'open' ? 0.5 : 1 }}>
             <div className="finding-top">
               <SevDot severity={i.severity} label={INSTABILITY_LABEL[i.type]} />
               <span className="finding-target mono">{i.targetLabel ?? i.target}</span>

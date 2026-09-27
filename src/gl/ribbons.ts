@@ -51,14 +51,15 @@ void main() {
 const FS = `
 precision mediump float;
 uniform vec3 uColor;
-uniform float uAlpha, uH, uGlow;
+uniform float uAlpha, uH, uW, uGlow;
 varying float vT, vEdge, vDiff, vSpec, vRun;
 void main() {
   float ends = smoothstep(0.0, 0.14, vT) * smoothstep(1.0, 0.86, vT);
   float edge = 1.0 - smoothstep(0.6, 1.0, abs(vEdge));
   float pulse = exp(-pow((fract(vRun) - 0.5) * 10.0, 2.0));
-  // thin out over the lower page, where the content is dense
-  float low = smoothstep(0.05, 0.5, gl_FragCoord.y / uH);
+  // thin out over the lower page, where the content is dense, and sweep in
+  // from the right: page titles are set left, and the livery stays off them
+  float low = smoothstep(0.05, 0.5, gl_FragCoord.y / uH) * smoothstep(0.3, 0.8, gl_FragCoord.x / uW);
   vec3 col = min(uColor * (0.55 + 0.5 * vDiff) + vec3(vSpec * 0.75 + pulse * uGlow), 1.0);
   float a = uAlpha * ends * edge * low * (0.7 + 0.3 * vDiff);
   gl_FragColor = vec4(col * a, a);
@@ -77,7 +78,7 @@ const FOV = (38 * Math.PI) / 180
 
 function build(gl: WebGLRenderingContext, invalidate: () => void): Scene {
   const prog = program(gl, VS, FS)
-  const u = uniforms(gl, prog, ['uProj', 'uTime', 'uPhase', 'uAmp', 'uY', 'uZ', 'uWidth', 'uHalfW', 'uLift', 'uTurn', 'uTwist', 'uColor', 'uAlpha', 'uH', 'uGlow'] as const)
+  const u = uniforms(gl, prog, ['uProj', 'uTime', 'uPhase', 'uAmp', 'uY', 'uZ', 'uWidth', 'uHalfW', 'uLift', 'uTurn', 'uTwist', 'uColor', 'uAlpha', 'uH', 'uW', 'uGlow'] as const)
   const verts = new Float32Array((SEGMENTS + 1) * 4)
   for (let i = 0; i <= SEGMENTS; i++) verts.set([i / SEGMENTS, -1, i / SEGMENTS, 1], i * 4)
   const buf = gl.createBuffer()
@@ -119,6 +120,7 @@ function build(gl: WebGLRenderingContext, invalidate: () => void): Scene {
       gl.uniform1f(u.uLift, lift)
       gl.uniform1f(u.uTurn, turn)
       gl.uniform1f(u.uH, h)
+      gl.uniform1f(u.uW, w)
       const dark = night()
       gl.uniform1f(u.uGlow, dark ? 0.55 : 0.35)
       for (const r of RIBBONS) {
