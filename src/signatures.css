@@ -1,0 +1,96 @@
+/* ============================================================
+   Signatures — each page's own moment in 3D.
+
+   The depth engine (depth.css) gives every page the same materials; these
+   give a page something only it has, built from its own content. All of it
+   exists only under html[data-dim="3d"] (the components render nothing in
+   2D), and none of it invents data: surfaces are computed from the page's
+   inputs, layers from the project's own graph.
+   ============================================================ */
+
+/* ---------- Power: the surface the curves are slices of ---------- */
+.power-surface{position:relative; height:clamp(300px, 40vw, 440px); margin-top:2px; border-radius:var(--radius-sm); overflow:hidden;
+  background:radial-gradient(90% 80% at 50% 70%, color-mix(in srgb, var(--blue) 8%, transparent), transparent 70%)}
+.power-surface canvas{position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:pan-y; outline:none}
+.power-surface canvas:active{cursor:grabbing}
+.power-surface canvas:focus-visible{outline:2px solid var(--accent,var(--blue)); outline-offset:-2px; border-radius:var(--radius-sm)}
+.ps-labels{position:absolute; inset:0; pointer-events:none; font:600 10px var(--mono); color:var(--muted)}
+.ps-labels > span{position:absolute; left:0; top:0; white-space:nowrap; will-change:transform}
+.ps-tick.x{translate:-50% 3px}
+.ps-tick.y{translate:6px -50%}
+.ps-tick.z{translate:calc(-100% - 4px) -50%}
+.ps-tick.planned{color:#2f6bff}
+.ps-tick.target{color:var(--amber)}
+.ps-title{translate:-50% 2px; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2)}
+.ps-title.z{translate:calc(-100% - 4px) -50%}
+.ps-title.y{translate:6px -50%}
+.ps-point{translate:-50% calc(-100% - 12px); padding:3px 8px; border-radius:6px; font-size:10.5px; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); box-shadow:0 8px 16px -10px rgba(4,10,28,.45)}
+html[data-theme="night"] .ps-tick.planned{color:#7aa2ff}
+
+/* ---------- Knowledge graph & mechanism: Flat ⇄ Layers ---------- */
+.graph-stage{position:relative}
+.layers-switch{position:absolute; top:12px; left:12px; z-index:4}
+.graph-layers{position:absolute; inset:0; z-index:3; border-radius:var(--radius); overflow:hidden;
+  background:radial-gradient(90% 90% at 50% 60%, color-mix(in srgb, var(--blue) 7%, var(--card)), var(--card) 75%);
+  border:1px solid var(--line)}
+.graph-layers canvas{position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:pan-y; outline:none}
+.graph-layers canvas:active{cursor:grabbing}
+.graph-layers canvas:focus-visible{outline:2px solid var(--accent,var(--blue)); outline-offset:-2px}
+.gl-labels{position:absolute; inset:0; pointer-events:none}
+.gl-labels > span{position:absolute; left:0; top:0; white-space:nowrap; will-change:transform}
+.gl-layer{translate:6px calc(-100% - 4px); font:700 9.5px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2)}
+.gl-layer b{margin-left:4px; padding:1px 6px; border-radius:999px; background:var(--chip); color:var(--chip-ink); font-weight:700}
+.gl-node{translate:-50% calc(-100% - 11px); font:600 11px var(--sans); color:var(--ink); padding:1px 6px; border-radius:6px;
+  background:color-mix(in srgb, var(--card) 82%, transparent)}
+.gl-node.dim{opacity:.35}
+.gl-node.lit,.gl-node.selected{font-weight:800; background:var(--card); box-shadow:0 4px 12px -6px rgba(4,10,28,.4)}
+.gl-empty{position:absolute; left:50%; bottom:18px; translate:-50% 0; margin:0; font-size:12.5px; color:var(--muted); text-align:center}
+/* while layered, the flat graph underneath keeps its place but stays out of reach */
+.graph-stage.is-layered > :first-child{visibility:hidden}
+
+/* ---------- Theory: the section you're reading comes forward ----------
+   The scroll-spy's section (.is-reading) sits at the glass; the rest wait a
+   little further back and dimmer, so the page reads like a focus pull.
+   Perspective per section, so a long chapter doesn't drift off its column. */
+html[data-dim="3d"] .theory-sec{transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s ease}
+html[data-dim="3d"] .theory-sec:not(.is-reading){transform:perspective(1600px) translateZ(-56px); opacity:.7}
+
+/* ---------- Slides: the deck as cover flow ----------
+   Scroll the deck sideways: the slide in the middle faces you, the rest turn
+   away down either side like a corridor. Pure CSS, driven by each slide's own
+   position in the scroller — nothing is added to the slides themselves, so the
+   exported deck is untouched. Browsers without scroll-driven animation keep a
+   plain row. */
+@keyframes deck-flow{
+  0%{transform:translateZ(-160px) rotateY(-52deg); opacity:.5}
+  50%{transform:none; opacity:1}
+  100%{transform:translateZ(-160px) rotateY(52deg); opacity:.5}
+}
+html[data-dim="3d"] .deck{display:flex; align-items:center; gap:30px; overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory; padding:28px calc(50% - 298px) 34px; perspective:1300px; scrollbar-width:thin}
+html[data-dim="3d"] .deck .slide{zoom:.62; flex:none; margin:0; scroll-snap-align:center; box-shadow:0 34px 60px -30px rgba(4,10,28,.55)}
+@supports (animation-timeline: view()){
+  html[data-dim="3d"] .deck .slide{animation:deck-flow linear both; animation-timeline:view(inline)}
+}
+@media(prefers-reduced-motion:reduce){html[data-dim="3d"] .deck .slide{animation:none}}
+
+/* ---------- Decisions: a card turns over, or leaves (lib/swap.ts cardSwap) ----------
+   Out of the current filter, a screening record goes where the decision
+   sends it — included cards sail right, excluded ones drop away, maybes slide
+   aside to wait. Still in view (any record under All, a resolved finding, a
+   re-graded hypothesis), the card flips over to its new state. */
+html[data-card-swap]::view-transition-old(root),
+html[data-card-swap]::view-transition-new(root){animation:none}
+@keyframes card-include{to{transform:perspective(900px) translate3d(70%,-12%,120px) rotateY(-30deg) rotateZ(5deg); opacity:0}}
+@keyframes card-exclude{to{transform:perspective(900px) translate3d(0,50%,-320px) rotateX(-55deg); opacity:0}}
+@keyframes card-aside{to{transform:perspective(900px) translate3d(-55%,0,-220px) rotateY(28deg); opacity:0}}
+@keyframes card-flip-out{to{transform:perspective(900px) rotateX(88deg); opacity:.4}}
+@keyframes card-flip-in{from{transform:perspective(900px) rotateX(-88deg); opacity:.4}}
+/* by default the card flips; a card with no new self (:only-child) leaves instead */
+html[data-card-swap]::view-transition-old(card-swap){animation:card-flip-out .2s cubic-bezier(.55,0,.8,.2) both; transform-origin:50% 100%}
+html[data-card-swap]::view-transition-new(card-swap){animation:card-flip-in .34s .18s cubic-bezier(.16,1.2,.3,1) both; transform-origin:50% 0}
+html[data-card-swap="include"]::view-transition-old(card-swap):only-child{animation:card-include .55s cubic-bezier(.55,0,.75,.2) both}
+html[data-card-swap="exclude"]::view-transition-old(card-swap):only-child{animation:card-exclude .55s cubic-bezier(.55,0,.75,.2) both}
+html[data-card-swap]:is([data-card-swap="maybe"],[data-card-swap="clear"])::view-transition-old(card-swap):only-child{animation:card-aside .5s cubic-bezier(.55,0,.75,.2) both}
+html[data-card-swap]::view-transition-group(card-swap){animation-duration:.4s}

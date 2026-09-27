@@ -9,6 +9,7 @@ import { computeMeta, fmt } from '../lib/metaAnalysis'
 import { streamChat, hasKey, getModel } from '../lib/openai'
 import type { Hypothesis, HypothesisStatus, HypEvidence } from '../types'
 import { analysisIncluded } from '../lib/cohorts'
+import { cardSwap } from '../lib/swap'
 
 type Draft = {
   label: string
@@ -174,7 +175,7 @@ export default function Hypotheses() {
                   </span>
                 )}
                 {suggested !== h.status && (
-                  <button className="chip-btn suggest" onClick={() => updateHypothesis(h.id, { status: suggested })} title="Apply the status the evidence suggests">Suggest: <b>{suggested}</b> ↦</button>
+                  <button className="chip-btn suggest" onClick={(e) => cardSwap(e.currentTarget.closest('.hcard'), 'flip', () => updateHypothesis(h.id, { status: suggested }))} title="Apply the status the evidence suggests">Suggest: <b>{suggested}</b> ↦</button>
                 )}
               </div>
 

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '../lib/store'
-import GraphView, { type GraphHandle } from '../components/GraphView'
+import { type GraphHandle } from '../components/GraphView'
+import GraphStage from '../components/GraphStage'
 import { Kicker, Rule } from '../components/ui'
 import { Modal, Field } from '../components/Modal'
 import { NODE_COLORS, nodeColor } from '../lib/palette'
@@ -117,7 +118,7 @@ export default function Graph() {
 
       <div className="graph-wrap">
         <div>
-          <GraphView ref={graphRef} nodes={state.nodes} edges={state.edges} selectedId={sel?.id} onSelect={setSel} onNodeMove={(id, x, y) => updateNode(id, { x, y })} showLabels={labels} search={q} hiddenTypes={hidden} />
+          <GraphStage ref={graphRef} nodes={state.nodes} edges={state.edges} selectedId={sel?.id} onSelect={setSel} onNodeMove={(id, x, y) => updateNode(id, { x, y })} showLabels={labels} search={q} hiddenTypes={hidden} />
           <div className="card" style={{ marginTop: 12 }}>
             <div className="flex" style={{ justifyContent: 'space-between', marginBottom: 10 }}>
               <div className="card-h" style={{ margin: 0 }}>NODE TYPES · {state.nodes.length} nodes · {state.edges.length} edges</div>
