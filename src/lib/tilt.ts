@@ -25,6 +25,7 @@ const SURFACES = [
   '.card', '.stat', '.overview-stats', '.preset', '.screen-rec', '.finding',
   '.tbl-scroll', '.theory-sec', '.project-tab', '.quiz-panel', '.quiz-opt',
   '.pico-cell', '.session-item', '.publication-watch', '.evidence-passage',
+  '.ecg-monitor',
 ].join(',')
 const HANDS_OFF = '[data-no-tilt],.graph-canvas,.graph-svg'
 const EDITABLE = 'input,textarea,select,[contenteditable="true"],[contenteditable=""]'

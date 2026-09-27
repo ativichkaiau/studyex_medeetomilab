@@ -5,6 +5,8 @@ import { Kicker, Rule, StatCard, SevDot } from '../components/ui'
 import { INSTABILITY_LABEL } from '../lib/palette'
 import { STAGES } from '../types'
 import { analysisIncluded } from '../lib/cohorts'
+import { hasCuratedTheory } from '../lib/projectTheory'
+import EcgMonitor from '../components/EcgMonitor'
 
 function rel(ts: number, now: number): string {
   const s = Math.max(0, Math.round((now - ts) / 1000))
@@ -94,6 +96,8 @@ export default function Garage() {
           <button className={`btn sm ${editing ? 'primary' : 'ghost'}`} style={{ flex: 'none' }} onClick={() => setEditing((v) => !v)}>{editing ? '✓ Done' : '✎ Edit'}</button>
         </div>
       </div>
+
+      {hasCuratedTheory(state.project) && <EcgMonitor />}
 
       <div className="grid g4 overview-stats">
         <StatCard value={`${Math.round(stability * 100)}%`} label="Project rigor" sub={`${open.length} open flags`} tone="#1746d1" />
