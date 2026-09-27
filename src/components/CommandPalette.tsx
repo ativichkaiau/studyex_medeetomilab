@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { theoryChunks } from '../lib/theoryRag'
 import type { ThemePreference } from '../lib/theme'
 import { Portal } from './Portal'
 import { setDim, useDim } from '../lib/dimension'
+import { useSwapNavigate } from '../lib/swap'
 
 interface Cmd {
   id: string
@@ -56,7 +56,7 @@ function score(hay: string, q: string): number {
 
 export default function CommandPalette({ open, onClose, onSetTheme, onOpenCopilot }: { open: boolean; onClose: () => void; onSetTheme: (preference: ThemePreference) => void; onOpenCopilot: () => void }) {
   const { state, projects, switchProject, undo, redo, canUndo, canRedo, reset } = useStore()
-  const nav = useNavigate()
+  const nav = useSwapNavigate()
   const dim = useDim()
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)

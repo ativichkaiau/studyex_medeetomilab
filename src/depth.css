@@ -164,6 +164,8 @@ html[data-dim="3d"] .ai-fab:active{translate:0 3px; box-shadow:inset 0 2px 6px r
 
 /* ---------- the 2D ⇄ 3D switch ---------- */
 .dim-toggle{gap:8px}
+/* on a phone the cube alone says it; the page title needs the room */
+@media(max-width:560px){.dim-label{display:none}}
 .dim-cube{position:relative; width:12px; height:12px; flex:none; transform-style:preserve-3d;
   transform:rotateX(-26deg) rotateY(40deg)}
 .dim-cube i{position:absolute; inset:0; border:1.5px solid currentColor; border-radius:1px}
@@ -198,3 +200,49 @@ html[data-dim-swap="2d"]::view-transition-new(root){animation:dim-drop-flat .6s 
 @media print{
   .depth-stage{display:none}
 }
+
+/* ---------- page swap (lib/swap.ts) ----------
+   The root snapshot is exactly what was on screen, so the page rolls away
+   from where you were reading. The shell is captured as separate layers that
+   hold still while the page turns behind them.
+
+   The page is one face of an eight-sided drum. Old and new pages are
+   neighbouring faces, 45° apart, and turn together as one rigid body: its
+   axis sits R = H / (2·tan 22.5°) ≈ 1.207 viewport heights behind the glass,
+   exactly far enough that the two faces share an edge. Nothing fades — the
+   face turning away from the light just darkens. */
+html{--sb-w:var(--sidebar)}
+@media(max-width:960px){html{--sb-w:0px}}
+html[data-page-swap] .sidebar{view-transition-name:sidebar}
+html[data-page-swap] .topbar{view-transition-name:topbar}
+html[data-page-swap] .tb-title{view-transition-name:page-title}
+html[data-page-swap] .sb-link.active{view-transition-name:nav-key}
+html[data-page-swap] :is(.ai-fab,.ai-panel){view-transition-name:assistant}
+html[data-page-swap]::view-transition{background:var(--vt-stage)}
+html[data-page-swap]::view-transition-image-pair(root){perspective:1600px;
+  perspective-origin:calc(var(--sb-w) + (100% - var(--sb-w)) / 2) 50%}
+html[data-page-swap]::view-transition-old(root),
+html[data-page-swap]::view-transition-new(root){transform-origin:50% 50% calc(-1.207 * 100vh);
+  mix-blend-mode:normal; backface-visibility:hidden;
+  /* the same clock for both faces keeps the drum rigid; the tail overshoots a
+     degree and settles, like a reel clicking onto its detent */
+  animation-duration:.64s; animation-timing-function:cubic-bezier(.6,0,.22,1.1); animation-fill-mode:both}
+@keyframes drum-out-up{to{transform:rotateX(45deg); filter:brightness(.5)}}
+@keyframes drum-out-down{to{transform:rotateX(-45deg); filter:brightness(.5)}}
+@keyframes drum-in-below{from{transform:rotateX(-45deg); filter:brightness(.5)}}
+@keyframes drum-in-above{from{transform:rotateX(45deg); filter:brightness(.5)}}
+html[data-page-swap="down"]::view-transition-old(root){animation-name:drum-out-up}
+html[data-page-swap="down"]::view-transition-new(root){animation-name:drum-in-below}
+html[data-page-swap="up"]::view-transition-old(root){animation-name:drum-out-down}
+html[data-page-swap="up"]::view-transition-new(root){animation-name:drum-in-above}
+/* the shell barely changes — a quick settle, not a crossfade you notice */
+html[data-page-swap]::view-transition-group(sidebar),
+html[data-page-swap]::view-transition-group(topbar),
+html[data-page-swap]::view-transition-group(assistant){animation-duration:.22s}
+/* the topbar title turns over like a split-flap */
+@keyframes flap-away{to{transform:perspective(300px) rotateX(88deg); opacity:.3}}
+@keyframes flap-in{from{transform:perspective(300px) rotateX(-88deg); opacity:.3}}
+html[data-page-swap]::view-transition-old(page-title){transform-origin:50% 100%; animation:flap-away .26s cubic-bezier(.55,0,.8,.2) both}
+html[data-page-swap]::view-transition-new(page-title){transform-origin:50% 0; animation:flap-in .42s .2s cubic-bezier(.16,1.2,.3,1) both}
+/* the pressed nav key slides to its new slot, with a little spring */
+html[data-page-swap]::view-transition-group(nav-key){animation-duration:.5s; animation-timing-function:cubic-bezier(.3,1.35,.5,1)}

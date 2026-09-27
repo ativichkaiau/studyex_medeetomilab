@@ -78,9 +78,10 @@ export function useLiveryMotion(routeKey: string) {
     }
   }, [motionEnabled, routeKey])
 
-  // the page itself acknowledges a route change
+  // the page itself acknowledges a route change (unless a 3D page swap is
+  // already carrying it in — see lib/swap.ts)
   useEffect(() => {
-    if (!motionEnabled) return
+    if (!motionEnabled || document.documentElement.dataset.pageSwap) return
     const el = document.querySelector<HTMLElement>('.content')
     if (!el) return
     // restart the animation: drop the class, force a reflow, re-add
@@ -125,6 +126,10 @@ export function useLiveryMotion(routeKey: string) {
       io = obs
 
       const collect = () => {
+        // A 3D page swap rolls the whole page in; sections already on screen
+        // arrive with it rather than each fading up inside the rolling page.
+        // Read per collection: cards that arrive later still get an entrance.
+        const swapping = !!document.documentElement.dataset.pageSwap
         const targets = Array.from(root.querySelectorAll<HTMLElement>(surfaces))
           .filter((el) => !armed.has(el) && !el.parentElement?.closest(surfaces))
           .map((el) => ({ el, rect: el.getBoundingClientRect() }))
@@ -133,7 +138,7 @@ export function useLiveryMotion(routeKey: string) {
           armed.add(el)
           if (rect.bottom <= 64) continue
           if (rect.top < viewportH() - 24) {
-            reveal(el, 90 + Math.min(visibleIndex++ * 90, 360))
+            if (!swapping) reveal(el, 90 + Math.min(visibleIndex++ * 90, 360))
           } else {
             el.classList.add('lv-pending')
             obs.observe(el)

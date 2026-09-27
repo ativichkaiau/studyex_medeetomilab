@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '../lib/store'
 import { SEVERITY_COLOR } from '../lib/palette'
 import AssistantDock from './AssistantDock'
@@ -9,6 +9,7 @@ import { Rule } from './ui'
 import { useLiveryMotion } from '../lib/motion'
 import { useDim, toggleDim } from '../lib/dimension'
 import { useTiltField } from '../lib/tilt'
+import { setRouteOrder, useLinkSwap, useSwapNavigate } from '../lib/swap'
 import DepthStage from './DepthStage'
 import { Portal } from './Portal'
 import { useTheme, type ThemePreference } from '../lib/theme'
@@ -73,6 +74,9 @@ const NAV = [
     ],
   },
 ]
+
+// The drum turns in the direction of travel down (or up) this list.
+setRouteOrder(NAV.flatMap((g) => g.items.map((i) => i.to)))
 
 // Each route's signature accent is reserved for small navigation and header details.
 const ACCENT: Record<string, string> = Object.fromEntries(NAV.flatMap((g) => g.items.map((i) => [i.to, i.color])))
@@ -140,7 +144,7 @@ export default function Layout() {
       return next
     })
   const loc = useLocation()
-  const nav = useNavigate()
+  const nav = useSwapNavigate()
   // close the mobile drawer whenever the route changes
   useEffect(() => setNavOpen(false), [loc.pathname])
   const { preference, theme, setThemePreference } = useTheme()
@@ -206,8 +210,16 @@ export default function Layout() {
     return () => window.removeEventListener('keydown', onKey)
   }, [nav])
 
+  // A new page opens at its top. Navigation used to keep the old scroll
+  // offset, so leaving a long page dropped you at the bottom of the next.
+  // Layout effect, and ahead of the motion hook: the page swap's snapshot and
+  // the entrance measurements both need the new page already at the top.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [loc.pathname])
   useLiveryMotion(loc.pathname)
   useTiltField()
+  useLinkSwap()
   const dim = useDim()
 
   const openFlags = instabilities.filter((i) => i.status === 'open').length
@@ -310,11 +322,12 @@ export default function Layout() {
               type="button"
               className="toggle dim-toggle"
               onClick={toggleDim}
+              aria-label="3D interface"
               aria-pressed={dim === '3d'}
               title={dim === '3d' ? 'Flatten to 2D (⇧D)' : 'Stand up in 3D (⇧D)'}
             >
               <span className="dim-cube" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
-              {dim === '3d' ? '3D' : '2D'}
+              <span className="dim-label">{dim === '3d' ? '3D' : '2D'}</span>
             </button>
             <select
               className="toggle theme-select"
