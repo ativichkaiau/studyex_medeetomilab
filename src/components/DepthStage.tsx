@@ -3,7 +3,9 @@ import { useDim } from '../lib/dimension'
 
 /**
  * The floor the 3D interface stands on: a perspective grid receding to a lit
- * horizon, with the livery's three stripes painted down it like a track.
+ * horizon, with the livery's three stripes painted down it like a track, and
+ * the livery again as ribbons of air streaming past the horizon (a WebGL
+ * scene, gl/ribbons.ts, loaded only once 3D is on).
  * Scrolling drives forward over it; the pointer sways the vanishing point.
  *
  * Purely decorative — fixed behind everything (z-index -1, so it shows only
@@ -14,6 +16,20 @@ import { useDim } from '../lib/dimension'
 export default function DepthStage() {
   const dim = useDim()
   const ref = useRef<HTMLDivElement>(null)
+  const gl = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (dim !== '3d') return
+    let stop = () => {}
+    let alive = true
+    import('../gl/ribbons').then(({ mountRibbons }) => {
+      if (alive && gl.current) stop = mountRibbons(gl.current)
+    })
+    return () => {
+      alive = false
+      stop()
+    }
+  }, [dim])
 
   useEffect(() => {
     const el = ref.current
@@ -55,6 +71,7 @@ export default function DepthStage() {
       <div className="depth-floor" />
       <div className="depth-track" />
       <div className="depth-horizon" />
+      <canvas ref={gl} className="depth-gl" />
     </div>
   )
 }
