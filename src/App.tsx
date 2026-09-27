@@ -1,37 +1,38 @@
 import { lazy } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
+import { pages } from './routes'
 
 // Every page is its own chunk: the shell loads first, and a page's code
-// arrives when it is first visited. Meanwhile Layout's Suspense boundary
-// shows that page's blueprint (components/Skeleton.tsx).
-const EvidenceLibrary = lazy(() => import('./pages/EvidenceLibrary'))
-const Garage = lazy(() => import('./pages/Garage'))
-const PitWall = lazy(() => import('./pages/PitWall'))
-const Portfolio = lazy(() => import('./pages/Portfolio'))
-const LitLink = lazy(() => import('./pages/LitLink'))
-const Hypotheses = lazy(() => import('./pages/Hypotheses'))
-const Mechanism = lazy(() => import('./pages/Mechanism'))
-const Assays = lazy(() => import('./pages/Assays'))
-const Radar = lazy(() => import('./pages/Radar'))
-const Power = lazy(() => import('./pages/Power'))
-const GrantAims = lazy(() => import('./pages/GrantAims'))
-const Suspension = lazy(() => import('./pages/Suspension'))
-const Graph = lazy(() => import('./pages/Graph'))
-const Review = lazy(() => import('./pages/Review'))
-const Theory = lazy(() => import('./pages/Theory'))
-const SrmaProtocol = lazy(() => import('./pages/SrmaProtocol'))
-const Screening = lazy(() => import('./pages/Screening'))
-const Prisma = lazy(() => import('./pages/Prisma'))
-const Studies = lazy(() => import('./pages/Studies'))
-const MetaAnalysis = lazy(() => import('./pages/MetaAnalysis'))
-const DiagnosticMA = lazy(() => import('./pages/DiagnosticMA'))
-const References = lazy(() => import('./pages/References'))
-const Manuscript = lazy(() => import('./pages/Manuscript'))
-const Poster = lazy(() => import('./pages/Poster'))
-const Reviewers = lazy(() => import('./pages/Reviewers'))
-const SharedImport = lazy(() => import('./pages/SharedImport'))
-const NotFound = lazy(() => import('./pages/NotFound'))
+// arrives when it is first visited (or hovered — see routes.ts). Meanwhile
+// Layout's Suspense boundary shows that page's blueprint (components/Skeleton.tsx).
+const EvidenceLibrary = lazy(pages['/evidence'])
+const Garage = lazy(pages['/'])
+const PitWall = lazy(pages['/pit-wall'])
+const Portfolio = lazy(pages['/portfolio'])
+const LitLink = lazy(pages['/litlink'])
+const Hypotheses = lazy(pages['/hypotheses'])
+const Mechanism = lazy(pages['/mechanism'])
+const Assays = lazy(pages['/assays'])
+const Radar = lazy(pages['/radar'])
+const Power = lazy(pages['/power'])
+const GrantAims = lazy(pages['/aims'])
+const Suspension = lazy(pages['/suspension'])
+const Graph = lazy(pages['/graph'])
+const Review = lazy(pages['/review'])
+const Theory = lazy(pages['/theory'])
+const SrmaProtocol = lazy(pages['/protocol'])
+const Screening = lazy(pages['/screening'])
+const Prisma = lazy(pages['/prisma'])
+const Studies = lazy(pages['/studies'])
+const MetaAnalysis = lazy(pages['/meta'])
+const DiagnosticMA = lazy(pages['/diagnostic'])
+const References = lazy(pages['/references'])
+const Manuscript = lazy(pages['/manuscript'])
+const Poster = lazy(pages['/poster'])
+const Reviewers = lazy(pages['/reviewers'])
+const SharedImport = lazy(pages['/shared'])
+const NotFound = lazy(pages['*'])
 
 export default function App() {
   return (

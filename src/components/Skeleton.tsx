@@ -400,7 +400,14 @@ function body(kind: SkKind, parts?: string[]): ReactNode {
     case 'notices':
       return <div className="sk-tickets">{[0, 1, 2].map((i) => <div key={i} style={{ ['--i' as string]: i } as CSSProperties}><i className="sk-doi" /><Bar w={58 - i * 9} h={8} /><i className="sk-stamp" /></div>)}</div>
     case 'sync':
-      return <div className="sk-sync"><i /><i /><i /><b>☁</b></div>
+      // this device ⇄ the cloud, changes crossing both ways
+      return (
+        <div className="sk-sync">
+          <div className="sk-end"><b>This device</b><Bar w={72} h={7} /><Bar w={48} h={7} /></div>
+          <div className="sk-wire"><i /><i /><i /></div>
+          <div className="sk-end"><b>Cloud</b><Bar w={64} h={7} /><Bar w={52} h={7} /></div>
+        </div>
+      )
     case 'snapshot':
       return <><Bar w={50} h={16} tone="ink" /><Stats n={3} z={10} /><Para lines={3} /></>
   }
@@ -415,7 +422,7 @@ export function Sk({ kind, label, parts }: { kind: SkKind; label?: string; parts
   // the label animates its own ellipsis, so drop one a caller's text brings
   const text = (label ?? (kind === 'sources' && parts?.length === 1 ? `Searching ${parts[0]}` : LABELS[kind])).replace(/…$/, '')
   return (
-    <div className={`sk-async sk-${kind}`} role="status" aria-busy="true" aria-live="polite">
+    <div className="sk-async" data-kind={kind} role="status" aria-busy="true" aria-live="polite">
       <div className="sk-label"><i className="sk-cube" aria-hidden="true" />{text}<span className="sk-ellipsis" aria-hidden="true"><i /><i /><i /></span></div>
       <div className="sk-async-body" aria-hidden="true">{body(kind, parts)}</div>
     </div>
