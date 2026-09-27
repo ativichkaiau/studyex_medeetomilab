@@ -10,6 +10,7 @@ import type { Study, RobLevel, CohortProfile } from '../types'
 import { CohortFields, CohortReviewPanel } from '../components/CohortReview'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { analysisIncluded } from '../lib/cohorts'
+import { Sk } from '../components/Skeleton'
 
 const numStr = (v: unknown) => (v === null || v === undefined || v === '' || Number.isNaN(Number(v)) ? '' : String(v))
 
@@ -305,7 +306,7 @@ function ProjectStudies() {
             style={{ border: '1.5px dashed color-mix(in srgb, var(--accent, var(--blue)) 45%, var(--line))', borderRadius: 10, padding: '14px 16px', textAlign: 'center', cursor: 'pointer', marginBottom: 12, background: 'color-mix(in srgb, var(--accent, var(--blue)) 5%, transparent)' }}
           >
             {extract.reading ? (
-              <span className="small"><b>{extract.reading}</b></span>
+              <Sk kind="pages" label={extract.reading} />
             ) : extract.source ? (
               <span className="small">✓ <b>{extract.source}</b> — text below. Click to replace, or edit before extracting.</span>
             ) : (
@@ -313,6 +314,7 @@ function ProjectStudies() {
             )}
           </div>
           <textarea className="textarea" rows={9} style={{ width: '100%' }} placeholder="…or paste the abstract / full-text excerpt here" value={extract.text} onChange={(e) => setExtract({ ...extract, text: e.target.value, source: undefined })} />
+          {extract.loading && <div style={{ marginTop: 12 }}><Sk kind="extraction" parts={[r.indexLabel, r.comparatorLabel]} /></div>}
           {extract.error && <div className="err" style={{ marginTop: 12, marginBottom: 0 }}>{extract.error}</div>}
           <div className="form-actions">
             <button className="btn ghost" onClick={() => setExtract(null)}>Cancel</button>

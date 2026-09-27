@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
 import { Markdown } from '../components/Markdown'
+import { Sk } from '../components/Skeleton'
 import { ForestPlot, FunnelPlot, PrismaFlow, RobPlot } from '../components/srmaPlots'
 import { computeMeta, eggersTest, leaveOneOut, computeGrade, trimAndFill } from '../lib/metaAnalysis'
 import { buildMarkdown, EXPORT_CSS } from '../lib/manuscript'
@@ -99,10 +100,10 @@ function ProjectManuscript() {
 
       <ProjectTabs />
       <p className="small muted">Click a claim or its ↗ marker to inspect and attach source passages. Evidence links are saved with this project.</p>
-      {aiText && (
+      {(aiText || aiOn) && (
         <div className="card lg rail" style={{ marginBottom: 16 }}>
           <div className="card-h"><span className="sq" style={{ background: 'var(--accent, var(--blue))' }} />AI-POLISHED ABSTRACT &amp; DISCUSSION</div>
-          <TraceableText document="manuscript" sectionId="polished"><Markdown text={aiText} /></TraceableText>
+          {aiText ? <TraceableText document="manuscript" sectionId="polished"><Markdown text={aiText} /></TraceableText> : <Sk kind="polish" />}
         </div>
       )}
 

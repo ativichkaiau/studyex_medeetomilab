@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useStore } from '../lib/store'
 import { Kicker, Rule, StatCard } from '../components/ui'
 import { Markdown } from '../components/Markdown'
+import { Sk } from '../components/Skeleton'
 import { ForestPlot, FunnelPlot } from '../components/srmaPlots'
 import { FigureFrame } from '../components/FigureFrame'
 import { computeMeta, leaveOneOut, subgroupAnalysis, eggersTest, computeGrade, trimAndFill, cumulativeMeta, metaRegression, dataIntegrity, influenceDiagnostics, petPeese, beggsTest, absoluteEffect, measureInfo, MEASURES, fmt } from '../lib/metaAnalysis'
@@ -341,7 +342,7 @@ export default function MetaAnalysis() {
           <span><span className="sq" style={{ background: 'var(--accent, var(--blue))' }} />RESULTS PARAGRAPH · AI DRAFT</span>
           {aiOn ? <button className="icon-btn" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn primary sm" onClick={draft}>✦ Draft</button>}
         </div>
-        {aiText ? <Markdown text={aiText} /> : <p className="small">Draft a publication-style results paragraph from the pooled estimate, heterogeneity and GRADE.</p>}
+        {aiText ? <Markdown text={aiText} /> : aiOn ? <Sk kind="results" /> : <p className="small">Draft a publication-style results paragraph from the pooled estimate, heterogeneity and GRADE.</p>}
       </div>
     </>
   )

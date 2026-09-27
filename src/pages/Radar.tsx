@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, Rule } from '../components/ui'
+import { Sk } from '../components/Skeleton'
 import { searchPubmed, type PubmedHit } from '../lib/pubmed'
 import { searchSources, crossrefByDoi, ALL_SOURCES, type SourceHit, type SourceName } from '../lib/sources'
 import { complete, parseJsonLoose, hasKey, getModel, type JsonSchemaResponseFormat } from '../lib/openai'
@@ -326,6 +327,7 @@ export default function Radar() {
               <span className="spacer" />
               <Link className="small" to="/screening">Open screening →</Link>
             </div>
+            {living.running && <Sk kind="hits" label="Re-running saved searches" />}
             {living.ran && (
               living.newHits.length === 0 ? (
                 <p className="small" style={{ color: 'var(--green)', marginTop: 10 }}>✓ Up to date — no new results across your saved searches.</p>
@@ -379,11 +381,13 @@ export default function Radar() {
 
         {error && <div className="err" style={{ marginTop: 12, marginBottom: 0 }}>{error}</div>}
 
-        {hits.length > 0 && (
+        {loading && <Sk kind="hits" />}
+        {!loading && hits.length > 0 && (
           <>
             <div className="flex" style={{ gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
               <button className="btn ghost sm" onClick={runTriage} disabled={triaging}>{triaging ? 'Triaging…' : '✦ AI relevance triage'}</button>
               {triagedIncludes.length > 0 && <button className="btn primary sm" onClick={sendAllIncludes}>→ Send {triagedIncludes.length} "include" to Studies</button>}
+              {triaging && <span className="sr-only" role="status">Triaging relevance…</span>}
               {fresh.size > 0 && <span className="pill" style={{ borderColor: 'var(--green)', color: 'var(--green)' }}>{fresh.size} new since last run</span>}
               <span className="small mono muted" style={{ marginLeft: 'auto' }}>{hits.length} hits</span>
             </div>
@@ -396,7 +400,7 @@ export default function Radar() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="nm">
                         {fresh.has(h.pmid) && <span className="new-dot" title="New since last run">NEW</span>}
-                        {tv && <span className={`vbadge ${VERDICT_CLASS[tv.verdict]}`} title={tv.reason}>{tv.verdict}</span>}
+                        {tv ? <span className={`vbadge ${VERDICT_CLASS[tv.verdict]}`} title={tv.reason}>{tv.verdict}</span> : triaging && <span className="vbadge sk-vbadge" aria-hidden="true" />}
                         {h.title}
                       </div>
                       <div className="meta">
@@ -445,6 +449,7 @@ export default function Radar() {
         </div>
 
         {msError && <div className="err" style={{ marginTop: 12, marginBottom: 0 }}>{msError}</div>}
+        {msLoading && <Sk kind="sources" parts={ALL_SOURCES.filter((s) => msSources.has(s))} />}
 
         {msMeta && msHits.length > 0 && (
           <>

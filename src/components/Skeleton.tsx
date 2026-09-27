@@ -317,7 +317,7 @@ export function RouteSkeleton({ path }: { path: string }) {
 export type SkKind =
   | 'answer' | 'critique' | 'protocol' | 'extraction' | 'pages' | 'hits' | 'sources' | 'triage'
   | 'citations' | 'records' | 'abstract' | 'reading' | 'finer' | 'letter' | 'results' | 'polish'
-  | 'aims' | 'audit' | 'theory' | 'sync' | 'snapshot'
+  | 'aims' | 'audit' | 'theory' | 'sync' | 'snapshot' | 'revision' | 'notices'
 
 const LABELS: Record<SkKind, string> = {
   answer: 'Composing an answer', critique: 'Pressure-testing the hypothesis', protocol: 'Drafting the SOP',
@@ -325,10 +325,11 @@ const LABELS: Record<SkKind, string> = {
   triage: 'Triaging relevance', citations: 'Finding the latest papers', records: 'Fetching records', abstract: 'Loading the abstract',
   reading: 'Assembling a reading list', finer: 'Checking against FINER', letter: 'Drafting responses', results: 'Writing the results',
   polish: 'Polishing the prose', aims: 'Polishing the aims', audit: 'Reviewing the design', theory: 'Building the theory',
-  sync: 'Syncing', snapshot: 'Opening the shared project',
+  sync: 'Syncing', snapshot: 'Opening the shared project', revision: 'Reviewing new evidence',
+  notices: 'Checking publication notices',
 }
 
-function body(kind: SkKind): ReactNode {
+function body(kind: SkKind, parts?: string[]): ReactNode {
   switch (kind) {
     case 'answer':
       return <><Bar w={42} h={13} tone="accent" /><Para lines={3} /><Checklist n={3} mark="•" /><Para lines={2} /></>
@@ -337,7 +338,7 @@ function body(kind: SkKind): ReactNode {
     case 'protocol':
       return <div className="sk-steps">{Array.from({ length: 5 }, (_, i) => <div key={i}><b>{i + 1}</b><Para lines={i % 2 ? 2 : 1} /></div>)}</div>
     case 'extraction':
-      return <div className="sk-2x2"><span /><b>Event</b><b>No event</b><b>Index</b><i /><i /><b>Comparator</b><i /><i /></div>
+      return <div className="sk-2x2"><span /><b>Event</b><b>No event</b><b>{parts?.[0] ?? 'Index'}</b><i /><i /><b>{parts?.[1] ?? 'Comparator'}</b><i /><i /></div>
     case 'pages':
       return <div className="sk-pdf">{[0, 1, 2, 3].map((i) => <div key={i} style={{ ['--i' as string]: i } as CSSProperties}><Para lines={5} gap={6} /></div>)}</div>
     case 'hits':
@@ -345,7 +346,7 @@ function body(kind: SkKind): ReactNode {
     case 'triage':
       return <Hits n={3} verdicts />
     case 'sources':
-      return <div className="sk-sources">{['PubMed', 'Europe PMC', 'CrossRef', 'Trials'].map((s, i) => <Block z={8 + i * 4} key={s} className="sk-source"><b>{s}</b><Bar w={80} h={8} /><Bar w={60} h={8} /></Block>)}</div>
+      return <div className="sk-sources">{(parts ?? ['PubMed', 'Europe PMC', 'CrossRef', 'ClinicalTrials.gov']).map((s, i) => <Block z={8 + i * 4} key={s} className="sk-source"><b>{s}</b><Bar w={80} h={8} /><Bar w={60} h={8} /></Block>)}</div>
     case 'citations':
       return <ol className="sk-cites">{[0, 1, 2].map((i) => <li key={i}><Bar w={88 - i * 9} h={9} tone="ink" /><Bar w={46} h={7} tone="soft" /></li>)}</ol>
     case 'records':
@@ -357,16 +358,47 @@ function body(kind: SkKind): ReactNode {
     case 'finer':
       return <div className="sk-finer">{['F', 'I', 'N', 'E', 'R'].map((k) => <div key={k}><b>{k}</b><Bar w={70} h={9} /></div>)}</div>
     case 'letter':
-      return <div className="sk-letter">{[0, 1].map((i) => <div key={i}><Bar w={24} h={9} tone="accent" /><Para lines={3} /></div>)}</div>
+      // point-by-point: each reviewer point gets its response
+      return <div className="sk-letter">{(parts?.length ? parts.slice(0, 4) : ['', '']).map((p, i) => <div key={i}>{p ? <b>{p}</b> : <Bar w={24} h={9} tone="accent" />}<Para lines={i % 2 ? 2 : 3} /></div>)}</div>
     case 'results':
       return <><Para lines={4} /><div className="sk-numbers">{[0, 1, 2].map((i) => <i key={i} />)}</div></>
     case 'polish':
+      // a structured abstract, then the discussion
+      return (
+        <div className="sk-abstract">
+          {['Background', 'Methods', 'Results', 'Conclusions'].map((h, i) => <div key={h}><b>{h}</b><Para lines={i === 2 ? 3 : 2} /></div>)}
+          <div className="sk-discussion"><Bar w={26} h={12} tone="accent" /><Para lines={4} /></div>
+        </div>
+      )
     case 'aims':
-      return <><Bar w={30} h={12} tone="accent" /><Para lines={5} /></>
+      // one page: the hook paragraph, then each aim in its box
+      return (
+        <>
+          <Para lines={3} />
+          <div className="sk-aims">{(parts?.length ? parts : ['Aim 1', 'Aim 2', 'Aim 3']).map((p) => <div key={p}><b>{p}</b><Bar w={70} h={10} tone="ink" /><Para lines={2} /></div>)}</div>
+        </>
+      )
     case 'audit':
       return <div className="sk-findings mini">{[0, 1, 2].map((i) => <div key={i} className={`sk-finding s${i}`}><Bar w={40} h={9} tone="ink" /><Para lines={2} /></div>)}</div>
     case 'theory':
-      return <><Bar w={56} h={16} tone="ink" /><Para lines={5} /><Network /></>
+      // a chapter being written: the contents fill in beside the first section
+      return (
+        <div className="sk-chapter">
+          <div className="sk-toc">{Array.from({ length: 7 }, (_, i) => <Bar key={i} w={48 + ((i * 19) % 44)} h={8} tone={i === 0 ? 'accent' : undefined} />)}</div>
+          <div className="sk-chapter-body"><Bar w={56} h={16} tone="ink" /><Para lines={4} /><i className="sk-plate short" /><Para lines={3} /></div>
+        </div>
+      )
+    case 'revision':
+      // current evidence update → proposed one, linked to its source passages
+      return (
+        <div className="sk-compare">
+          <div className="was"><Bar w={40} h={7} tone="soft" /><Para lines={3} /></div>
+          <b aria-hidden="true">→</b>
+          <div className="now"><Bar w={44} h={7} tone="accent" /><Para lines={4} /><div className="sk-links"><i /><i /><i /></div></div>
+        </div>
+      )
+    case 'notices':
+      return <div className="sk-tickets">{[0, 1, 2].map((i) => <div key={i} style={{ ['--i' as string]: i } as CSSProperties}><i className="sk-doi" /><Bar w={58 - i * 9} h={8} /><i className="sk-stamp" /></div>)}</div>
     case 'sync':
       return <div className="sk-sync"><i /><i /><i /><b>☁</b></div>
     case 'snapshot':
@@ -374,13 +406,18 @@ function body(kind: SkKind): ReactNode {
   }
 }
 
-/** An in-place skeleton for something that is loading or being generated. */
-export function Sk({ kind, label }: { kind: SkKind; label?: string }) {
-  const text = label ?? LABELS[kind]
+/**
+ * An in-place skeleton for something that is loading or being generated.
+ * `parts` names what is actually being fetched where a blueprint has lanes
+ * (the sources being searched), so the skeleton never promises more.
+ */
+export function Sk({ kind, label, parts }: { kind: SkKind; label?: string; parts?: string[] }) {
+  // the label animates its own ellipsis, so drop one a caller's text brings
+  const text = (label ?? (kind === 'sources' && parts?.length === 1 ? `Searching ${parts[0]}` : LABELS[kind])).replace(/…$/, '')
   return (
     <div className={`sk-async sk-${kind}`} role="status" aria-busy="true" aria-live="polite">
       <div className="sk-label"><i className="sk-cube" aria-hidden="true" />{text}<span className="sk-ellipsis" aria-hidden="true"><i /><i /><i /></span></div>
-      <div className="sk-async-body" aria-hidden="true">{body(kind)}</div>
+      <div className="sk-async-body" aria-hidden="true">{body(kind, parts)}</div>
     </div>
   )
 }

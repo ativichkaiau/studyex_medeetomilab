@@ -13,6 +13,7 @@ import { Markdown } from '../components/Markdown'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { LivingTheory } from '../components/LivingTheory'
 import { TraceableText } from '../components/Evidence'
+import { Sk } from '../components/Skeleton'
 
 // --- per-section citations + live "latest on PubMed" ---
 function SectionCitations({ id }: { id: string }) {
@@ -52,7 +53,8 @@ function SectionCitations({ id }: { id: string }) {
         <span className="small mono muted">query: {data.query}</span>
         {err && <span className="small" style={{ color: 'var(--red)' }}>{err}</span>}
       </div>
-      {hits && hits.length > 0 && (
+      {loading && <Sk kind="citations" />}
+      {!loading && hits && hits.length > 0 && (
         <ul className="cite-list latest">
           {hits.map((h) => (
             <li key={h.pmid}>
@@ -63,7 +65,7 @@ function SectionCitations({ id }: { id: string }) {
           ))}
         </ul>
       )}
-      {hits && hits.length === 0 && <p className="small empty">No recent results returned.</p>}
+      {!loading && hits && hits.length === 0 && <p className="small empty">No recent results returned.</p>}
     </div>
   )
 }
@@ -217,7 +219,7 @@ function ProjectTheoryPage() {
             <span className="small muted">{getModel()}{draft ? ' · replaces the saved draft; Undo restores it' : ''}</span>
             {!hasKey() && <Link className="small" to="/review?settings=1">Add API key →</Link>}
           </div>
-          {generating && <p className="small" role="status">Writing sections for {state.project.code}. Leaving this page or switching projects cancels generation.</p>}
+          {generating && <><Sk kind="theory" label={`Writing theory for ${state.project.code}`} /><p className="small">Leaving this page or switching projects cancels generation.</p></>}
           {error && <p className="theory-error" role="alert">{error}</p>}
           {draft && <p className="small muted">Saved {new Date(draft.generatedAt).toLocaleString()} · {draft.model}. AI draft — verify claims against primary sources.</p>}
         </div>

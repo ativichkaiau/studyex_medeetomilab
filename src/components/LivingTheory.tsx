@@ -8,6 +8,7 @@ import { collectReferences } from '../lib/references'
 import { hasKey } from '../lib/openai'
 import { EvidenceLinks } from './Evidence'
 import { PublicationWatch } from './PublicationWatch'
+import { Sk } from './Skeleton'
 
 export function LivingTheory() {
   const { state, updateResearch } = useStore()
@@ -53,6 +54,7 @@ export function LivingTheory() {
     {!ready && <p className="small muted">Generate this project’s Theory first to enable chapter revisions.</p>}
     {!hasKey() && <p className="small"><Link to="/review?settings=1">Add an API key</Link> to generate proposed revisions.</p>}
     {!!awaiting.length && <details className="living-awaiting"><summary>{awaiting.length} references awaiting source passages</summary><p className="small muted">A title alone cannot establish a finding. Add the relevant passage to make the paper available for revision review.</p>{awaiting.map((r) => <div className="evidence-pending-paper" key={r.id}><span>{r.title || `${r.author} ${r.year}`}</span><Link className="btn ghost sm" to={`/evidence?reference=${encodeURIComponent(r.id)}`}>Add passage</Link></div>)}</details>}
+    {busy && <Sk kind="revision" />}
     {error && <p className="evidence-error" role="alert">{error} <button className="btn ghost sm" disabled={busy || !incoming.length} onClick={() => void draft()}>Retry</button></p>}
     {!pending.length && !!e.assessments.length && <p className="small muted" role="status">Latest review: {e.assessments[e.assessments.length - 1].summary}</p>}
     {pending.map((r) => {
