@@ -26,16 +26,21 @@ function hash(s: string) {
 
 // ---------- References: the library as a shelf ----------
 
+// the shelf holds this many books; past it, a plaque counts the rest (the
+// library table under the shelf lists every reference either way)
+const SHELF_MAX = 60
+
 export function Bookshelf({ refs, onPick }: { refs: Reference[]; onPick: (id: string) => void }) {
   const dim = useDim()
   if (dim !== '3d' || refs.length === 0) return null
+  const more = refs.length - SHELF_MAX
   return (
     <div className="card lg shelf-card" data-no-tilt>
       <div className="card-h"><span className="sq" style={{ background: 'var(--navy)' }} />THE SHELF · {refs.length} VOLUME{refs.length === 1 ? '' : 'S'}</div>
       <div className="shelf-scene">
         <div className="shelf">
           <div className="shelf-row" role="list" aria-label="References as books; choose one to find it in the library below">
-            {refs.map((r) => {
+            {refs.slice(0, SHELF_MAX).map((r) => {
               const h = hash(r.id)
               return (
                 <button
@@ -54,6 +59,7 @@ export function Bookshelf({ refs, onPick }: { refs: Reference[]; onPick: (id: st
                 </button>
               )
             })}
+            {more > 0 && <span className="shelf-more" role="listitem">+{more} more in the library</span>}
           </div>
           <div className="shelf-board" aria-hidden="true" />
         </div>

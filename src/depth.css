@@ -46,13 +46,18 @@ html[data-dim="3d"][data-theme="night"]{
 
 /* ---------- the floor ---------- */
 .depth-stage{position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;
-  perspective:640px; perspective-origin:calc(50% + var(--sway,0px)) 30%;
+  perspective:640px; perspective-origin:50% 30%;
   background:radial-gradient(95% 50% at 50% 30%, var(--horizon), transparent 72%)}
 .depth-floor,.depth-track{position:absolute; left:-110vw; right:-110vw; bottom:-2px; height:280vh;
   transform-origin:50% 100%; transform:rotateX(79deg)}
-.depth-floor{
+/* Scrolling drives forward over the grid by sliding the plane itself toward
+   you (DepthStage writes --floor-y, wrapped at one cell). A transform, not a
+   moving background: the compositor shifts tiles it has already drawn,
+   where a background-position change would repaint the whole floor, every
+   frame of every scroll. */
+.depth-floor{transform:rotateX(79deg) translateY(var(--floor-y,0px)); will-change:transform;
   background-image:linear-gradient(var(--floor-line) 2px, transparent 2px), linear-gradient(90deg, var(--floor-line) 2px, transparent 2px);
-  background-size:96px 96px; background-position:50% var(--floor-y,0px), 50% 0;
+  background-size:96px 96px; background-position:50% 0;
   -webkit-mask-image:linear-gradient(to top, #000 0%, #000 30%, transparent 94%);
   mask-image:linear-gradient(to top, #000 0%, #000 30%, transparent 94%)}
 /* The livery, painted down the floor like a track. It lives only in the
@@ -72,15 +77,29 @@ html[data-dim="3d"][data-theme="night"]{
   background:linear-gradient(90deg, transparent, var(--horizon-line) 30%, var(--horizon-line) 70%, transparent);
   box-shadow:0 0 22px 4px var(--horizon); opacity:.9}
 
-/* ---------- slabs ---------- */
+/* ---------- slabs ----------
+   Slabs animate only their transform. Their shadows, borders and light change
+   instantly: a transitioning box-shadow or border repaints the whole slab —
+   a long table and all — on every frame of the transition, and the lift's
+   own motion already carries the change to the eye. */
 html[data-dim="3d"] :is(.card,.stat,.overview-stats,.preset,.screen-rec,.finding,.tbl-scroll,.theory-sec,
   .project-tab,.quiz-panel,.theory-controls,.graph-controls,.publication-watch,.evidence-passage,.graph-svg){
   box-shadow:inset 0 1px 0 var(--glint), 0 1px 0 var(--edge), 0 2px 0 var(--edge), 0 3px 0 var(--edge-2), 0 14px 26px -16px var(--drop);
-  transition:background-color .24s, border-color .24s, box-shadow .5s cubic-bezier(.2,.8,.2,1), transform .75s cubic-bezier(.2,.8,.2,1)}
+  transition:transform .75s cubic-bezier(.2,.8,.2,1)}
 /* surfaces set into another surface get a hairline edge, not a second slab */
 html[data-dim="3d"] :is(.card,.theory-sec,.overview-stats,.quiz-panel,.screen-rec) :is(.card,.stat,.tbl-scroll,.pico-cell,.preset,.quiz-opt,.session-item,.evidence-passage){
   box-shadow:inset 0 1px 0 var(--glint), 0 1px 0 var(--edge), 0 2px 0 var(--edge-2);
-  transition:translate .45s cubic-bezier(.2,.8,.2,1), box-shadow .35s, background-color .24s}
+  transition:translate .45s cubic-bezier(.2,.8,.2,1)}
+
+/* The tilt field (lib/tilt.ts) writes these on the slab under the pointer,
+   every frame. Registered as not inherited, a write restyles that one slab;
+   as ordinary custom properties they'd inherit, and every frame would
+   restyle everything inside it — each cell of a long table. */
+@property --rx{syntax:'*'; inherits:false}
+@property --ry{syntax:'*'; inherits:false}
+@property --mx{syntax:'*'; inherits:false}
+@property --my{syntax:'*'; inherits:false}
+@property --tp{syntax:'*'; inherits:false}
 html[data-dim="3d"] .overview-stats{overflow:visible}
 html[data-dim="3d"] .overview-stats .stat{box-shadow:none}
 
@@ -91,7 +110,7 @@ html[data-dim="3d"] .tilting{position:relative; z-index:3;
   background-image:radial-gradient(130% 130% at var(--mx,50%) var(--my,50%), var(--shine), transparent 45%, var(--shade));
   border-color:color-mix(in srgb, var(--accent,var(--blue)) 30%, var(--line));
   box-shadow:inset 0 1px 0 var(--glint), 0 1px 0 var(--edge), 0 2px 0 var(--edge), 0 3px 0 var(--edge), 0 4px 0 var(--edge-2), 0 30px 50px -22px var(--drop-2);
-  transition:background-color .24s, border-color .24s, box-shadow .25s ease-out, transform .16s ease-out}
+  transition:transform .16s ease-out}
 /* keep the 3D context alive down to whatever is lifting off the slab */
 html[data-dim="3d"] .tilting :has(.lifted){transform-style:preserve-3d}
 html[data-dim="3d"] .tilting .lifted{translate:0 0 46px; background-color:var(--lift-face);
@@ -162,7 +181,9 @@ html[data-dim="3d"] .stat b{transform-origin:50% 0;
 /* ---------- floating surfaces ---------- */
 html[data-dim="3d"] :is(.modal,.kbd-card,.cmdk,.ai-panel,.proj-menu){
   box-shadow:inset 0 1px 0 var(--glint), 0 1px 0 var(--edge), 0 2px 0 var(--edge), 0 3px 0 var(--edge), 0 4px 0 var(--edge-2), 0 50px 90px -30px rgba(6,10,26,.55)}
-html[data-dim="3d"] :is(.modal-overlay,.kbd-overlay,.cmdk-overlay){backdrop-filter:blur(6px) saturate(.85)}
+/* no frosted glass in 3D: behind an overlay the WebGL scenes keep moving, and
+   a backdrop blur would be recomputed over the whole screen every frame */
+html[data-dim="3d"] :is(.modal-overlay,.kbd-overlay,.cmdk-overlay,.sb-drawer-backdrop){backdrop-filter:none}
 html[data-dim="3d"] .ai-fab{box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 4px 0 var(--key-navy), 0 16px 28px -12px rgba(10,31,107,.6)}
 html[data-dim="3d"] .ai-fab:active{translate:0 3px; box-shadow:inset 0 2px 6px rgba(0,0,0,.4), 0 1px 0 var(--key-navy)}
 
@@ -205,10 +226,15 @@ html[data-dim-swap="2d"]::view-transition-new(root){animation:dim-drop-flat .6s 
 
 /* ---------- WebGL: the livery ribbons (gl/ribbons.ts) ---------- */
 .depth-gl{position:absolute; inset:0; width:100%; height:100%}
-/* the pointer's work light: it pools on the floor between the slabs */
-.depth-spot{position:absolute; inset:0; pointer-events:none; opacity:var(--spot-on,0); transition:opacity .5s ease;
-  background:radial-gradient(260px 200px at var(--spot-x,50%) var(--spot-y,50%), color-mix(in srgb, var(--blue) 12%, transparent), transparent 70%)}
-html[data-theme="night"] .depth-spot{background:radial-gradient(300px 230px at var(--spot-x,50%) var(--spot-y,50%), rgba(96,138,255,.2), transparent 70%)}
+/* The pointer's work light: it pools on the floor between the slabs. One
+   fixed pool of light, drawn once and carried by a transform; moving the
+   centre of a full-screen gradient instead would repaint the screen on every
+   pointer move. */
+.depth-spot{position:absolute; left:0; top:0; width:600px; height:460px; margin:-230px 0 0 -300px; pointer-events:none;
+  opacity:var(--spot-on,0); transition:opacity .5s ease; will-change:transform;
+  transform:translate3d(var(--spot-x,50vw), var(--spot-y,50vh), 0);
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--blue) 12%, transparent), transparent 61%)}
+html[data-theme="night"] .depth-spot{background:radial-gradient(closest-side, rgba(96,138,255,.2), transparent 70%)}
 @media(prefers-reduced-motion:reduce){.depth-spot{display:none}}
 
 /* ---------- the Overview monitor (components/EcgMonitor.tsx) ----------

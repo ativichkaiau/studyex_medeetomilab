@@ -369,7 +369,7 @@ export function mountPowerSurface(canvas: HTMLCanvasElement, overlay: HTMLElemen
     }
   }
 
-  const stop = run(canvas, build, { maxDpr: 2, fps: 30, depth: true, stillAt: 0 })
+  const stop = run(canvas, build, { maxDpr: 2, depth: true, stillAt: 0 })
   return {
     update(d) {
       data = d
