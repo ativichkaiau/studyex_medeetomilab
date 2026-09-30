@@ -357,7 +357,7 @@ export function mountLayers(canvas: HTMLCanvasElement, overlay: HTMLElement, onP
     }
   }
 
-  const stop = run(canvas, build, { maxDpr: 2, fps: 60, stillAt: 0 })
+  const stop = run(canvas, build, { maxDpr: 2, stillAt: 0 })
   return {
     update(m) {
       model = m

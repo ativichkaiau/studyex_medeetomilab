@@ -15,8 +15,10 @@ import { useDim } from './dimension'
  * - never the knowledge graph: GraphView maps pointer → SVG space with
  *   getScreenCTM(), which ignores 3D perspective, so a tilted ancestor would
  *   skew its drags and zoom-to-cursor;
- * - slabs taller than the viewport lift and catch light but don't lean —
- *   tipping a surface whose edges you can't see just reads as the page wobbling.
+ * - never a slab taller than the screen — tipping a surface whose edges you
+ *   can't see just reads as the page wobbling, and lifting one costs a full
+ *   re-render of it; the smaller surfaces inside it tilt on their own instead;
+ * - never while the page scrolls under a still pointer.
  */
 
 // Surfaces that behave as slabs. The outermost one under the pointer tilts; a
@@ -46,6 +48,9 @@ export function useTiltField() {
     let px = 0
     let py = 0
     let held = false
+    // what the active slab was last given, so a frame that changes nothing
+    // writes nothing (and so restyles and repaints nothing)
+    const written = new Map<string, string>()
 
     const release = () => {
       if (active) {
@@ -55,6 +60,13 @@ export function useTiltField() {
       lifted?.classList.remove('lifted')
       active = null
       lifted = null
+      written.clear()
+    }
+
+    const write = (el: HTMLElement, name: string, value: string) => {
+      if (written.get(name) === value) return
+      written.set(name, value)
+      el.style.setProperty(name, value)
     }
 
     const frame = () => {
@@ -69,26 +81,45 @@ export function useTiltField() {
       const nx = clamp(((px - r.left) / r.width) * 2 - 1, -1, 1)
       const ny = clamp(((py - r.top) / r.height) * 2 - 1, -1, 1)
       const size = Math.max(r.width, r.height)
-      // heavier slabs lean less: ~10° for a stat tile, ~3° for a full-width card
-      const lean = r.height > (window.innerHeight || 800) * 1.1 ? 0 : clamp(3400 / size, 1.5, 10)
-      const s = active.style
-      s.setProperty('--ry', `${(nx * lean).toFixed(2)}deg`)
-      s.setProperty('--rx', `${(-ny * lean).toFixed(2)}deg`)
-      s.setProperty('--mx', `${((nx + 1) * 50).toFixed(1)}%`)
-      s.setProperty('--my', `${((ny + 1) * 50).toFixed(1)}%`)
+      // heavier slabs lean less: ~10° for a stat tile, ~3° for a full-width
+      // card; one taller than the screen only lifts, and its light stays put
+      const tall = r.height > (window.innerHeight || 800) * 1.1
+      const lean = tall ? 0 : clamp(3400 / size, 1.5, 10)
+      write(active, '--ry', `${(nx * lean).toFixed(1)}deg`)
+      write(active, '--rx', `${(-ny * lean).toFixed(1)}deg`)
+      // The lean is a transform, which the compositor applies to the slab as
+      // already drawn. The light is painted into the slab, so every move of it
+      // repaints the whole slab: it moves in 4% steps, finer than the soft
+      // pool of light could show.
+      write(active, '--mx', `${tall ? 50 : Math.round((nx + 1) * 12.5) * 4}%`)
+      write(active, '--my', `${tall ? 20 : Math.round((ny + 1) * 12.5) * 4}%`)
       // pull the camera back from big slabs so their near edge doesn't balloon
-      s.setProperty('--tp', `${Math.round(Math.max(800, size * 1.8))}px`)
+      write(active, '--tp', `${Math.round(Math.max(800, size * 1.8) / 50) * 50}px`)
     }
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(frame)
     }
 
+    // The outermost surface that fits on screen tilts. One taller than that
+    // never visibly leans, and making it a 3D layer only to lift it means the
+    // browser re-renders all of it on the way in and again on the way out;
+    // inside one, the smaller surfaces tilt on their own instead.
+    let lastInner: HTMLElement | null = null
+    let lastPair: [HTMLElement | null, HTMLElement | null] = [null, null]
     const surfacesAt = (t: Element): [HTMLElement | null, HTMLElement | null] => {
       const inner = t.closest<HTMLElement>(SURFACES)
       if (!inner || !inner.closest('.content')) return [null, null]
-      let outer = inner
-      for (let up = inner.parentElement?.closest<HTMLElement>(SURFACES); up; up = up.parentElement?.closest<HTMLElement>(SURFACES)) outer = up
-      return [outer, inner]
+      // measured once per surface entered, not on every pointer move
+      if (inner === lastInner && lastPair[0]?.isConnected) return lastPair
+      const fits = (window.innerHeight || 800) * 0.9
+      let outer: HTMLElement | null = null
+      for (let s: HTMLElement | null = inner; s; s = s.parentElement?.closest<HTMLElement>(SURFACES) ?? null) {
+        if (s.getBoundingClientRect().height <= fits) outer = s
+        else break
+      }
+      lastInner = inner
+      lastPair = [outer, outer ? inner : null]
+      return lastPair
     }
 
     const track = (t: Element | null) => {
@@ -122,6 +153,14 @@ export function useTiltField() {
       py = e.clientY
       track(e.target as Element | null)
     }
+    // Scrolling slides the page under a still pointer: the slab settles, and
+    // nothing new tilts until the pointer itself moves again. Picking up each
+    // card as it passes would mean re-rendering it into a layer of its own
+    // and back, mid-scroll.
+    const onScroll = () => {
+      lastInner = null
+      release()
+    }
     const onDown = () => {
       held = true
       release()
@@ -130,8 +169,7 @@ export function useTiltField() {
       held = false
       if (e.pointerType === 'mouse') track(document.elementFromPoint(e.clientX, e.clientY))
     }
-    // the page moves under a still pointer when it scrolls, and focus can move
-    // into an editable field without the pointer moving at all
+    // focus can move into an editable field without the pointer moving at all
     const retrack = () => {
       if (active || lifted) track(document.elementFromPoint(px, py))
     }
@@ -140,7 +178,7 @@ export function useTiltField() {
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('pointerup', onUp, { passive: true })
-    window.addEventListener('scroll', retrack, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('blur', release)
     de.addEventListener('pointerleave', release)
     document.addEventListener('focusin', retrack)
@@ -148,7 +186,7 @@ export function useTiltField() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('scroll', retrack)
+      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('blur', release)
       de.removeEventListener('pointerleave', release)
       document.removeEventListener('focusin', retrack)

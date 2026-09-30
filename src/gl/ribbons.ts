@@ -147,5 +147,5 @@ function build(gl: WebGLRenderingContext, invalidate: () => void): Scene {
 /** Mount the ribbons on a full-viewport canvas; returns the teardown. */
 export function mountRibbons(canvas: HTMLCanvasElement): () => void {
   // a slow, soft background needs neither retina resolution nor 60fps
-  return run(canvas, build, { maxDpr: 1.25, fps: 30, stillAt: 6 })
+  return run(canvas, build, { maxDpr: 1.25, fps: 30, activeFps: 30, stillAt: 6 })
 }

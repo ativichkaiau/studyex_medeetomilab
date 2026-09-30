@@ -16,7 +16,10 @@ export interface Scene {
 
 export interface RunOptions {
   maxDpr?: number
+  /** frame rate while the scene only drifts on its own */
   fps?: number
+  /** frame rate while someone is handling it: for a moment after each invalidate() */
+  activeFps?: number
   /** a depth buffer, for scenes whose surfaces hide one another */
   depth?: boolean
   /** the time a reduced-motion still is drawn at */
@@ -29,7 +32,51 @@ type Build = (gl: WebGLRenderingContext, invalidate: () => void) => Scene
 
 const REDUCED = '(prefers-reduced-motion: reduce)'
 
-export function run(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps = 60, stillAt = 8, depth = false, onFail }: RunOptions = {}): () => void {
+// A page or 2D ⇄ 3D swap in flight (lib/swap.ts, lib/dimension.ts): the whole
+// page is being animated as a snapshot, and anything drawn meanwhile only makes
+// the browser re-render that snapshot.
+const swapping = () => {
+  const d = document.documentElement.dataset
+  return !!(d.pageSwap || d.dimSwap)
+}
+
+/** Run fn once no swap is in flight: now, or as the current one ends. */
+function afterSwap(fn: () => void): () => void {
+  if (!swapping()) {
+    fn()
+    return () => {}
+  }
+  const watch = new MutationObserver(() => {
+    if (swapping()) return
+    watch.disconnect()
+    fn()
+  })
+  watch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-page-swap', 'data-dim-swap'] })
+  return () => watch.disconnect()
+}
+
+/**
+ * Start a scene on a canvas; returns its teardown.
+ *
+ * Opening a WebGL context and compiling a scene's shaders each hold up the main
+ * thread for a moment, and so does closing a context. In the middle of a page
+ * or dimension swap that stall lands as a hitch in the animation, so a scene
+ * mounted during one (its page is arriving) starts as the swap ends, and one
+ * unmounted during one (its page is leaving, already just a snapshot) hands
+ * its context back afterwards.
+ */
+export function run(canvas: HTMLCanvasElement, build: Build, options: RunOptions = {}): () => void {
+  let stop: (() => void) | null = null
+  const cancel = afterSwap(() => {
+    stop = start(canvas, build, options)
+  })
+  return () => {
+    cancel()
+    stop?.()
+  }
+}
+
+function start(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps = 30, activeFps = 60, stillAt = 8, depth = false, onFail }: RunOptions): () => void {
   const gl = canvas.getContext('webgl', {
     alpha: true, premultipliedAlpha: true, antialias: true, depth, stencil: false, powerPreference: 'low-power',
   })
@@ -43,6 +90,8 @@ export function run(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps
   let raf = 0
   let last = -Infinity
   let onScreen = true
+  // until when the scene counts as being handled, and runs at activeFps
+  let hotUntil = 0
 
   const paint = (now: number) => {
     if (!scene) return
@@ -66,7 +115,8 @@ export function run(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps
       paint(now)
       return
     }
-    if (now - last >= 1000 / fps - 1) {
+    // ambient drift doesn't need 60fps; a drag or a fling does
+    if (!swapping() && now - last >= 1000 / (now < hotUntil ? activeFps : fps) - 1) {
       last = now
       paint(now)
     }
@@ -78,8 +128,11 @@ export function run(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps
     if (reduced.matches) paint(performance.now())
     else if (!raf) raf = requestAnimationFrame(tick)
   }
-  // a still frame is only repainted when something changes (a resize, the theme)
+  // Something changed: someone is turning the scene, or the size or theme moved.
+  // A still frame is repainted; a moving scene runs at full rate for a moment,
+  // long enough to carry a fling out.
   const invalidate = () => {
+    hotUntil = performance.now() + 1200
     if (reduced.matches) wake()
   }
   const make = () => {
@@ -128,7 +181,9 @@ export function run(canvas: HTMLCanvasElement, build: Build, { maxDpr = 1.5, fps
     scene?.dispose?.()
     scene = null
     // hand the GPU memory back now rather than whenever the canvas is collected
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    // (or, mid-swap, as soon as the swap is over)
+    const lose = gl.getExtension('WEBGL_lose_context')
+    afterSwap(() => lose?.loseContext())
   }
 }
 

@@ -44,13 +44,17 @@ export function useLiveryMotion(routeKey: string) {
   useEffect(() => {
     if (!motionEnabled) return
     const de = document.documentElement
+    // written on the bar itself: a custom property set on <html> is inherited
+    // by every element on the page, which is a lot to restyle on every frame
+    // of a scroll
+    const bar = () => document.querySelector<HTMLElement>('.tb-progress')
     let raf = 0
 
     const update = () => {
       raf = 0
       const max = de.scrollHeight - viewportH()
       const p = max > 8 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
-      de.style.setProperty('--scroll-progress', p.toFixed(4))
+      bar()?.style.setProperty('--scroll-progress', p.toFixed(4))
     }
 
     // A hidden document never delivers animation frames, so a plain rAF latch
@@ -74,7 +78,7 @@ export function useLiveryMotion(routeKey: string) {
       window.removeEventListener('resize', schedule)
       document.removeEventListener('visibilitychange', schedule)
       if (raf) cancelAnimationFrame(raf)
-      de.style.removeProperty('--scroll-progress')
+      bar()?.style.removeProperty('--scroll-progress')
     }
   }, [motionEnabled, routeKey])
 
