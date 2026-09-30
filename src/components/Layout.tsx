@@ -282,7 +282,6 @@ export default function Layout() {
 
       <div className="main" style={{ ['--accent' as string]: accent } as CSSProperties}>
         <div className="topbar">
-          <span className="livery-sweep" key={loc.pathname} aria-hidden="true" />
           <button className="hamburger" onClick={() => setNavOpen(true)} aria-label="Open menu">☰</button>
           <div className="tb-title">
             <div className="title">{title}</div>
