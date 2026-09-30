@@ -849,22 +849,23 @@ body:has(.sidebar.open) .ai-fab{ opacity:0; pointer-events:none; transform:trans
    here are all neutralised by the reduced-motion block at the end
    of this file; the scroll-driven pieces are JS-gated instead, in
    lib/motion.ts, which declines to run under the same preference.
+
+   Motion answers something — a page arriving, a value changing, the
+   pointer — and then stops. Nothing here loops while the page sits
+   idle; the only standing motion in the app is the 3D scene's own
+   (depth.css, gl/) and loaders that are genuinely waiting.
    ============================================================ */
 
 @keyframes lv-stripe{from{transform:skewX(-28deg) scaleX(0)}to{transform:skewX(-28deg) scaleX(1)}}
 @keyframes lv-wipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes lv-bar{from{transform:scaleY(.2); opacity:0}to{transform:scaleY(1); opacity:1}}
 @keyframes lv-in{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
-@keyframes lv-pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes lv-drift{0%,55%,100%{translate:0}25%{translate:7px 0}}
 @keyframes lv-heading{from{opacity:0; transform:var(--lv-heading-from,translateY(20px))}70%{opacity:1; transform:var(--lv-heading-mid,translateY(-2px))}to{opacity:1; transform:none}}
-@keyframes lv-hatch{to{background-position:16px 0}}
-@keyframes lv-sweep{0%{transform:translateX(-110%); opacity:0}8%{opacity:.9}36%{transform:translateX(410%); opacity:0}100%{transform:translateX(410%); opacity:0}}
 
 /* the three racing stripes streak in, staggered — the page's signature */
-.rule i{transform-origin:0 50%; animation:lv-stripe .65s cubic-bezier(.16,1,.3,1) both, lv-drift 4.8s 1s ease-in-out infinite}
-.rule i:nth-child(2){animation-delay:.1s,1.16s}
-.rule i:nth-child(3){animation-delay:.2s,1.32s}
+.rule i{transform-origin:0 50%; animation:lv-stripe .65s cubic-bezier(.16,1,.3,1) both}
+.rule i:nth-child(2){animation-delay:.1s}
+.rule i:nth-child(3){animation-delay:.2s}
 
 /* page header settles in behind them */
 .page-head .kicker{animation:lv-in .5s .05s ease both}
@@ -872,19 +873,12 @@ body:has(.sidebar.open) .ai-fab{ opacity:0; pointer-events:none; transform:trans
 .page-head::before{content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px; pointer-events:none;
   background:linear-gradient(90deg,var(--accent,var(--blue)),transparent 85%); transform-origin:left;
   animation:lv-wipe .95s .15s cubic-bezier(.16,1,.3,1) both}
-.page-head::after,.overview-review::after{background-size:16px 100%; animation:lv-hatch 1.8s linear infinite}
 
 /* the topbar livery bar wipes across once, on load */
 .topbar::before{transform-origin:0 50%; animation:lv-wipe .7s cubic-bezier(.2,.8,.2,1) both}
-.livery-sweep{position:absolute; inset:0 0 auto; height:3px; overflow:hidden; pointer-events:none}
-.livery-sweep::after{content:""; position:absolute; inset:0 auto 0 0; width:32%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent); animation:lv-sweep 6s .3s ease-in-out infinite}
 
 /* the active nav marker grows into place */
 .sb-link.active::before{animation:lv-bar .26s cubic-bezier(.2,.8,.2,1) both}
-
-/* live telemetry tick on the assistant */
-.ai-fab .rdot{animation:lv-pulse 2.4s ease-in-out infinite}
 
 /* press feedback, skewed like the livery */
 .btn:active:not(:disabled){transform:translateY(1px)}
@@ -937,9 +931,6 @@ body:has(.sidebar.open) .ai-fab{ opacity:0; pointer-events:none; transform:trans
 .gauge .track i{transform-origin:0 50%; animation:lv-wipe .6s .15s cubic-bezier(.2,.8,.2,1) both}
 .lv-show :is(.stage-track,.axis .bar,.pf-bar,.rp-track) > i{transform-origin:left;
   animation:lv-wipe 1s calc(var(--reveal-delay,0ms) + 160ms) cubic-bezier(.16,1,.3,1) backwards}
-.stage-track i{position:relative; overflow:hidden}
-.stage-track i::after{content:""; position:absolute; inset:0 auto 0 0; width:32%;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent); animation:lv-sweep 4.5s 1s ease-in-out infinite}
 
 /* the sidebar boots up: mark first, then the nav groups top to bottom */
 .sb-brand{animation:lv-in .4s ease both}
@@ -1067,6 +1058,4 @@ html[data-motion-paused] *,html[data-motion-paused] *::before,html[data-motion-p
     animation-delay:0s !important; transition-duration:.01ms !important; transition-delay:0s !important;
     scroll-behavior:auto !important}
   .lv-show{animation:none}
-  .livery-sweep,.stage-track i::after{display:none}
-  .rule i{translate:none}
 }

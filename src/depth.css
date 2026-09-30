@@ -147,9 +147,13 @@ html[data-dim="3d"] .rule .b{--stripe-edge:#040f3d}
 html[data-dim="3d"] .rule .r{--stripe-edge:#970012}
 html[data-dim="3d"] .rule .y{--stripe-edge:#b88f00}
 html[data-dim="3d"][data-theme="night"] .rule .b{--stripe-edge:#15378f}
-html[data-dim="3d"] .page-head h1{transform-origin:50% 100%;
-  --lv-heading-from:perspective(1100px) translate3d(0,24px,-170px) rotateX(26deg);
-  --lv-heading-mid:perspective(1100px) translate3d(0,-2px,6px) rotateX(-2deg)}
+/* A page arrives whole in 3D: as a face of the drum (lib/swap.ts), or with
+   its sections rising out of the floor on first load. The flat design's
+   piece-by-piece entrances would only jostle inside that rigid face, so here
+   they're off, and what moves is the 3D: the drum, sections rising from the
+   floor as you reach them, and the split-flap digits below. */
+html[data-dim="3d"] :is(.rule i,.page-head .kicker,.kicker .dot,.page-head h1,.page-head p,.card-h .sq,.stat span,.stat .sub,.pico-cell,tbody tr),
+html[data-dim="3d"] :is(.page-head,.stat span)::before{animation:none}
 /* stat readouts arrive like split-flap digits (and flip again when they change) */
 html[data-dim="3d"] .stat b{transform-origin:50% 0;
   --lv-heading-from:perspective(420px) rotateX(90deg);
@@ -167,7 +171,7 @@ html[data-dim="3d"] .ai-fab:active{translate:0 3px; box-shadow:inset 0 2px 6px r
 /* on a phone the cube alone says it; the page title needs the room */
 @media(max-width:560px){.dim-label{display:none}}
 .dim-cube{position:relative; width:12px; height:12px; flex:none; transform-style:preserve-3d;
-  transform:rotateX(-26deg) rotateY(40deg)}
+  transform:rotateX(-26deg) rotateY(40deg); transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .dim-cube i{position:absolute; inset:0; border:1.5px solid currentColor; border-radius:1px}
 .dim-cube i:nth-child(1){transform:translateZ(6px); background:color-mix(in srgb, var(--blue) 30%, transparent)}
 .dim-cube i:nth-child(2){transform:rotateY(180deg) translateZ(6px)}
@@ -175,8 +179,10 @@ html[data-dim="3d"] .ai-fab:active{translate:0 3px; box-shadow:inset 0 2px 6px r
 .dim-cube i:nth-child(4){transform:rotateY(-90deg) translateZ(6px)}
 .dim-cube i:nth-child(5){transform:rotateX(90deg) translateZ(6px); background:color-mix(in srgb, var(--yellow) 55%, transparent)}
 .dim-cube i:nth-child(6){transform:rotateX(-90deg) translateZ(6px)}
-@keyframes dim-cube-spin{to{transform:rotateX(-26deg) rotateY(400deg)}}
-html[data-dim="3d"] .dim-cube{animation:dim-cube-spin 9s linear infinite}
+/* at rest it sits still at its angle; pointing at the switch turns it to show its top */
+@media(hover:hover) and (pointer:fine){
+  html[data-dim="3d"] .dim-toggle:hover .dim-cube{transform:rotateX(-44deg) rotateY(72deg)}
+}
 html[data-dim="3d"] .dim-toggle{color:var(--chip-ink); border-color:color-mix(in srgb, var(--chip-ink) 35%, var(--line))}
 /* flat mode: a flat square — the cube folds down to its front face */
 html[data-dim="2d"] .dim-cube{transform:none}
