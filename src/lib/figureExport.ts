@@ -11,6 +11,7 @@ const VAR_NAMES = [
   '--blue', '--navy', '--red', '--amber', '--violet', '--green',
   '--good', '--good-ink', '--bad', '--bad-ink', '--warn', '--warn-ink',
   '--yellow', '--chip', '--chip-ink', '--accent',
+  '--font-ui', '--font-mono', '--sans', '--mono',
 ]
 
 function readLightVars(): string {

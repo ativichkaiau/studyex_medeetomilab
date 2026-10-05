@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { Kicker, Rule } from '../components/ui'
+import { Kicker } from '../components/ui'
+import EvidenceRegistry from '../components/EvidenceRegistry'
 import { Sk } from '../components/Skeleton'
 import RadarScope, { type ScopeContact } from '../components/RadarScope'
 import { searchPubmed, type PubmedHit } from '../lib/pubmed'
@@ -335,11 +336,13 @@ export default function Radar() {
   return (
     <>
       <div className="page-head">
-        <Rule />
-        <Kicker>LITERATURE · LIVE PUBMED</Kicker>
-        <h1>Literature Radar</h1>
-        <p>Search PubMed live, triage hits for the review with AI, link them to a hypothesis, and send them straight into the SRMA extraction table. Saved searches flag what's new since you last looked.</p>
+        <Kicker>pipeline / 02 literature · ingest</Kicker>
+        <h1>Literature</h1>
+        <p>The project's evidence registry, and the searches that feed it: PubMed live, Europe PMC, Crossref and trial registries, triage, and a living review that flags what's new since the last run.</p>
       </div>
+
+      <EvidenceRegistry />
+      <div className="sec-label">ingest · search &amp; triage</div>
 
       <RadarScope contacts={contacts} sources={ALL_SOURCES} onPick={findContact} />
 

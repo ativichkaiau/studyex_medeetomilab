@@ -1,4 +1,4 @@
-// WilliamsLab — research knowledge-graph schema.
+// studyex_medeetomilab — the research project schema.
 // Everything in the app is a typed node, a typed edge, or a view over them.
 
 export type NodeType =
@@ -237,6 +237,10 @@ export interface ScreenRecord {
   authors?: string
   d1?: ScreenDecision // reviewer 1, title/abstract
   d2?: ScreenDecision // reviewer 2, title/abstract
+  // A third-reviewer resolution of a reviewer conflict. Both original votes
+  // stay as they were (Cohen's κ is computed from them); the record's status
+  // follows this. Who resolved it, and when, goes to the activity log.
+  adjudicated?: ScreenDecision
   reason?: string // title/abstract exclusion reason
   ft?: 'include' | 'exclude' // full-text decision
   ftReason?: string // full-text exclusion reason
@@ -253,7 +257,28 @@ export interface GradeState {
   largeEffect?: 'none' | 'large' | 'very large'
 }
 
+// One logged analysis: what was pooled, how, and what came out — so a result
+// in the manuscript can be traced to the exact dataset that produced it.
+export interface AnalysisRun {
+  id: string
+  n: number // sequence within the project → RUN_0007
+  ts: number
+  outcome: string
+  effect: EffectMeasure
+  model: 'random' | 'fixed'
+  k: number
+  dataset: string // fingerprint of the pooled inputs
+  studies: string[] // Study ids pooled
+  pooled?: { est: number; low: number; high: number }
+  het?: { I2: number; tau2: number; Q: number; df: number; p: number }
+  status: 'success' | 'failed'
+  reason?: string
+}
+
 export interface Review {
+  runs?: AnalysisRun[] // the analysis log
+  // a section's review state, set by the authors (empty is computed, never stored)
+  manuscriptStatus?: Record<string, 'draft' | 'review' | 'final'>
   title: string
   question: string
   pico: { p: string; i: string; c: string; o: string }

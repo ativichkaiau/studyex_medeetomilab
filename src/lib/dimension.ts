@@ -2,10 +2,10 @@ import { useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 
 /**
- * Dimension — the interface renders either flat (2D, the original design) or
- * as a physical one (3D): lit slabs, keycap controls, pointer tilt, a floor to
- * stand on. Everything 3D lives in depth.css behind html[data-dim="3d"], so the
- * 2D app is exactly what it was and one attribute swaps between them.
+ * Dimension — the interface renders flat (2D, the default workstation) or,
+ * on request, as a physical one (3D): lit slabs, keycap controls, pointer
+ * tilt, a floor to stand on. Everything 3D lives in depth.css behind
+ * html[data-dim="3d"], so one attribute swaps between them.
  *
  * It is an external store rather than React state so any component can read
  * it without prop-drilling, and so the swap can run inside a View Transition,
@@ -31,8 +31,8 @@ function saved(): Dim | null {
   }
 }
 
-// 3D is the default; people who've asked their OS for less motion start flat.
-const fallback = (): Dim => (window.matchMedia(REDUCED).matches ? '2d' : '3d')
+// Flat is the default; 3D is opt-in (and remembered once chosen).
+const fallback = (): Dim => '2d'
 
 let current: Dim = saved() ?? fallback()
 document.documentElement.dataset.dim = current
@@ -86,7 +86,3 @@ export function setDim(next: Dim) {
 
 export const toggleDim = () => setDim(current === '3d' ? '2d' : '3d')
 
-// Until the user picks, follow the OS motion preference as it changes.
-window.matchMedia(REDUCED).addEventListener('change', () => {
-  if (!saved()) commit(fallback(), false)
-})

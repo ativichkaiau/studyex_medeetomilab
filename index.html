@@ -1,33 +1,39 @@
 <!doctype html>
-<html lang="en" data-theme="day">
+<html lang="en" data-theme="night" data-dim="2d">
   <head>
     <meta charset="UTF-8" />
     <script>
-      // Apply the saved choice before styles load; Auto follows this device.
+      // Apply the saved choices before styles load (keep in step with
+      // lib/theme.ts and lib/dimension.ts): dark unless chosen otherwise,
+      // 'auto' follows the device; flat unless 3D was chosen.
       (() => {
-        let preference = 'auto'
-        try { preference = localStorage.getItem('williamslab.theme') || 'auto' } catch {}
+        let preference = 'night'
+        try { preference = localStorage.getItem('williamslab.theme') || 'night' } catch {}
         document.documentElement.dataset.theme = preference === 'day' || preference === 'night'
           ? preference
           : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
-        // 3D unless the saved choice is flat, or the device asks for less motion.
         let dim = null
         try { dim = localStorage.getItem('williamslab.dim') } catch {}
-        document.documentElement.dataset.dim = dim === '2d' || dim === '3d'
-          ? dim
-          : window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '2d' : '3d'
+        document.documentElement.dataset.dim = dim === '3d' ? '3d' : '2d'
       })()
     </script>
-    <link rel="icon" type="image/png" href="/williams.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="WilliamsLab — a translational-research operating system. Stabilize the unknown. Ship the signal." />
+    <meta name="description" content="Evidence synthesis, systematic review, meta-analysis, research QA, and manuscript environment." />
+    <meta name="application-name" content="studyex_medeetomilab" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="studyex_medeetomilab" />
+    <meta property="og:title" content="studyex_medeetomilab // Research Runtime" />
+    <meta property="og:description" content="Evidence synthesis, systematic review, meta-analysis, research QA, and manuscript environment. A research runtime in the VESTRIPPN ecosystem." />
+    <meta property="og:image" content="/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#0a1f6b" />
-    <link rel="apple-touch-icon" href="/williams.png" />
+    <meta name="theme-color" content="#08090a" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="WilliamsLab" />
-    <title>WilliamsLab — Research OS</title>
+    <meta name="apple-mobile-web-app-title" content="medeetomilab" />
+    <title>studyex_medeetomilab // Research Runtime</title>
   </head>
   <body>
     <div id="root"></div>

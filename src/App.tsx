@@ -25,9 +25,11 @@ const SrmaProtocol = lazy(pages['/protocol'])
 const Screening = lazy(pages['/screening'])
 const Prisma = lazy(pages['/prisma'])
 const Studies = lazy(pages['/studies'])
+const Rob = lazy(pages['/rob'])
 const MetaAnalysis = lazy(pages['/meta'])
 const DiagnosticMA = lazy(pages['/diagnostic'])
 const References = lazy(pages['/references'])
+const Artifacts = lazy(pages['/artifacts'])
 const Manuscript = lazy(pages['/manuscript'])
 const Poster = lazy(pages['/poster'])
 const Reviewers = lazy(pages['/reviewers'])
@@ -56,9 +58,11 @@ export default function App() {
         <Route path="screening" element={<Screening />} />
         <Route path="prisma" element={<Prisma />} />
         <Route path="studies" element={<Studies />} />
+        <Route path="rob" element={<Rob />} />
         <Route path="meta" element={<MetaAnalysis />} />
         <Route path="diagnostic" element={<DiagnosticMA />} />
         <Route path="references" element={<References />} />
+        <Route path="artifacts" element={<Artifacts />} />
         <Route path="evidence" element={<EvidenceLibrary />} />
         <Route path="manuscript" element={<Manuscript />} />
         <Route path="poster" element={<Poster />} />

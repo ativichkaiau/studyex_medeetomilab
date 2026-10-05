@@ -1,11 +1,13 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../lib/store'
-import { SEVERITY_COLOR } from '../lib/palette'
 import AssistantDock from './AssistantDock'
 import CommandPalette from './CommandPalette'
 import Cloud from './Cloud'
-import { Rule } from './ui'
+import PipelineNav from './PipelineNav'
+import ContextPanel from './ContextPanel'
+import StatusBar from './StatusBar'
+import { Tag } from './ui'
 import { useLiveryMotion } from '../lib/motion'
 import { useDim, toggleDim } from '../lib/dimension'
 import { useTiltField } from '../lib/tilt'
@@ -15,105 +17,43 @@ import { Portal } from './Portal'
 import { RouteSkeleton } from './Skeleton'
 import { useTheme, type ThemePreference } from '../lib/theme'
 import type { SyncStatus } from '../lib/cloudSync'
+import { MODULES, moduleFor, projectPath } from '../lib/modules'
+import { pipeline, projectState } from '../lib/pipeline'
+import { analysisIncluded } from '../lib/cohorts'
+import { hasKey } from '../lib/openai'
+import { openTerra } from '../lib/terra'
+import { BRAND, projectTitle } from '../lib/brand'
 
 // g-chord destinations (press "g" then the key)
-const GNAV: Record<string, string> = { o: '/', d: '/pit-wall', r: '/review', t: '/theory', k: '/graph', m: '/meta', s: '/studies', h: '/hypotheses', p: '/prisma' }
-const SHORTCUTS: { keys: string; label: string }[] = [
-  { keys: '⌘/Ctrl + Z', label: 'Undo last edit' },
-  { keys: '⌘/Ctrl + ⇧ + Z', label: 'Redo' },
-  { keys: '⌘/Ctrl + K', label: 'Open the command palette' },
-  { keys: 'g then o / r / t / k / m / s', label: 'Go to Overview / Review / Theory / Graph / Meta / Studies' },
-  { keys: '⇧ + D', label: 'Swap between 3D and flat 2D' },
-  { keys: '?', label: 'Show this shortcuts panel' },
-  { keys: 'Esc', label: 'Close panels' },
-]
-
-const NAV = [
-  {
-    group: 'OVERVIEW',
-    items: [
-      { to: '/', label: 'Overview', icon: '⌂', color: '#1746d1', end: true },
-      { to: '/portfolio', label: 'Portfolio', icon: '▦', color: '#7c3aed' },
-      { to: '/pit-wall', label: 'Dashboard', icon: '▤', color: '#0891b2' },
-      { to: '/litlink', label: 'LitLink', icon: '⛓', color: '#0891b2' },
-    ],
-  },
-  {
-    group: 'SYSTEMATIC REVIEW',
-    items: [
-      { to: '/radar', label: 'Literature', icon: '◎', color: '#f59e0b' },
-      { to: '/protocol', label: 'Protocol', icon: '⊞', color: '#0d9488' },
-      { to: '/screening', label: 'Screening', icon: '☑', color: '#0891b2' },
-      { to: '/prisma', label: 'PRISMA Flow', icon: '⇉', color: '#0891b2' },
-      { to: '/studies', label: 'Studies', icon: '☰', color: '#6366f1' },
-      { to: '/meta', label: 'Meta-analysis', icon: '⬦', color: '#db2777' },
-      { to: '/diagnostic', label: 'Diagnostic MA', icon: '⊹', color: '#0d9488' },
-      { to: '/references', label: 'References', icon: '❋', color: '#1746d1' },
-      { to: '/manuscript', label: 'Manuscript', icon: '¶', color: '#ea580c' },
-      { to: '/poster', label: 'Poster & Slides', icon: '◳', color: '#e2001a' },
-      { to: '/reviewers', label: 'Rebuttal Letter', icon: '✎', color: '#0891b2' },
-    ],
-  },
-  {
-    group: 'EXPERIMENTS',
-    items: [
-      { to: '/hypotheses', label: 'Hypotheses', icon: '◆', color: '#7c3aed' },
-      { to: '/mechanism', label: 'Mechanism Map', icon: '⇄', color: '#2f6bff' },
-      { to: '/assays', label: 'Assays', icon: '▣', color: '#12b981' },
-      { to: '/power', label: 'Statistical Power', icon: '∑', color: '#0891b2' },
-      { to: '/aims', label: 'Specific Aims', icon: '◈', color: '#7c3aed' },
-      { to: '/suspension', label: 'Rigor Monitor', icon: '⚠', color: '#e2001a' },
-    ],
-  },
-  {
-    group: 'KNOWLEDGE',
-    items: [
-      { to: '/graph', label: 'Knowledge Graph', icon: '⬡', color: '#4f46e5' },
-      { to: '/theory', label: 'Theory', icon: '§', color: '#db2777' },
-      { to: '/evidence', label: 'Evidence', icon: '↗', color: '#0d9488' },
-      { to: '/review', label: 'Knowledge Review', icon: '✦', color: '#1746d1' },
-    ],
-  },
-]
-
-// The drum turns in the direction of travel down (or up) this list.
-setRouteOrder(NAV.flatMap((g) => g.items.map((i) => i.to)))
-
-// Each route's signature accent is reserved for small navigation and header details.
-const ACCENT: Record<string, string> = Object.fromEntries(NAV.flatMap((g) => g.items.map((i) => [i.to, i.color])))
-
-const TITLES: Record<string, string> = {
-  '/': 'Overview',
-  '/portfolio': 'Portfolio',
-  '/pit-wall': 'Dashboard',
-  '/litlink': 'LitLink',
-  '/protocol': 'Review Protocol',
-  '/screening': 'Screening',
-  '/prisma': 'PRISMA Flow',
-  '/studies': 'Included Studies',
-  '/meta': 'Meta-analysis',
-  '/diagnostic': 'Diagnostic Meta-analysis',
-  '/references': 'Reference Library',
-  '/manuscript': 'Manuscript',
-  '/poster': 'Poster & Slides',
-  '/reviewers': 'Response to Reviewers',
-  '/hypotheses': 'Hypotheses',
-  '/mechanism': 'Mechanism Map',
-  '/assays': 'Assays',
-  '/radar': 'Literature',
-  '/power': 'Statistical Power',
-  '/aims': 'Specific Aims',
-  '/suspension': 'Rigor Monitor',
-  '/graph': 'Knowledge Graph',
-  '/theory': 'Theory',
-  '/evidence': 'Evidence',
-  '/review': 'Knowledge Review',
+const GNAV: Record<string, string> = {
+  o: '/', l: '/radar', c: '/screening', e: '/studies', b: '/rob', s: '/meta', p: '/prisma', m: '/manuscript', q: '/suspension',
+  a: '/artifacts', k: '/graph', t: '/theory', h: '/hypotheses', r: '/review', d: '/pit-wall',
 }
+const SHORTCUTS: { keys: string; label: string }[] = [
+  { keys: '⌘K', label: 'command palette · search project' },
+  { keys: 'g then o', label: 'overview' },
+  { keys: 'g then l · c · e · b', label: 'literature · screening · extraction · risk of bias' },
+  { keys: 'g then s · p · m', label: 'statistics · PRISMA · manuscript' },
+  { keys: 'g then q · a', label: 'rigor · artifacts' },
+  { keys: 'I · E · U', label: 'screening: include · exclude · uncertain' },
+  { keys: 'J · K', label: 'screening: next · previous record' },
+  { keys: '⌘Z · ⌘⇧Z', label: 'undo · redo' },
+  { keys: '⇧T', label: 'open Terra' },
+  { keys: '⇧D', label: 'flat ⇄ 3D view' },
+  { keys: '?', label: 'this list' },
+  { keys: 'Esc', label: 'close panels' },
+]
 
-function gaugeColor(v: number) {
-  if (v >= 0.75) return SEVERITY_COLOR.low
-  if (v >= 0.5) return SEVERITY_COLOR.med
-  return SEVERITY_COLOR.high
+// The 3D page swap turns in the direction of travel down (or up) this list.
+setRouteOrder(MODULES.map((m) => m.to))
+
+const CONTEXT_KEY = 'williamslab.context'
+const readContext = () => {
+  try {
+    const v = localStorage.getItem(CONTEXT_KEY)
+    if (v === 'on' || v === 'off') return v === 'on'
+  } catch { /* fall through to the default */ }
+  return window.innerWidth >= 1500
 }
 
 export default function Layout() {
@@ -125,30 +65,30 @@ export default function Layout() {
   const [cloudStatus, setCloudStatus] = useState<SyncStatus | null>(null)
   const [navOpen, setNavOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
-    try {
-      return new Set<string>(JSON.parse(localStorage.getItem('williamslab.nav.collapsed') || '[]'))
-    } catch {
-      return new Set<string>()
-    }
-  })
-  const toggleGroup = (g: string) =>
-    setCollapsed((prev) => {
-      const next = new Set(prev)
-      if (next.has(g)) next.delete(g)
-      else next.add(g)
-      try {
-        localStorage.setItem('williamslab.nav.collapsed', JSON.stringify([...next]))
-      } catch {
-        /* ignore */
-      }
-      return next
-    })
+  const [contextOn, setContextOn] = useState(readContext)
   const loc = useLocation()
   const nav = useSwapNavigate()
   // close the mobile drawer whenever the route changes
   useEffect(() => setNavOpen(false), [loc.pathname])
   const { preference, theme, setThemePreference } = useTheme()
+
+  const stages = useMemo(() => pipeline(state), [state])
+  const run = projectState(stages, instabilities)
+  const mod = moduleFor(loc.pathname)
+  const path = projectPath(state.project.code, loc.pathname)
+  const terraReady = hasKey()
+  const openFlags = instabilities.filter((i) => i.status === 'open').length
+
+  const toggleContext = () =>
+    setContextOn((v) => {
+      try { localStorage.setItem(CONTEXT_KEY, v ? 'off' : 'on') } catch { /* this session only */ }
+      return !v
+    })
+
+  // the document title follows the project and the module
+  useEffect(() => {
+    document.title = mod && mod.id !== 'overview' ? projectTitle(state.project.code, mod.id) : loc.pathname === '/' ? projectTitle(state.project.code) : BRAND.title
+  }, [mod, state.project.code, loc.pathname])
 
   // keyboard shortcuts (undo/redo, help, g-chord navigation)
   const storeRef = useRef(store)
@@ -177,7 +117,7 @@ export default function Layout() {
         setPaletteOpen((v) => !v)
         return
       }
-      if (typing || mod) return
+      if (typing || mod || e.altKey) return
       if (e.key === '?') {
         setHelp((h) => !h)
         return
@@ -185,6 +125,11 @@ export default function Layout() {
       if (e.key === 'D' && e.shiftKey) {
         e.preventDefault()
         toggleDim()
+        return
+      }
+      if (e.key === 'T' && e.shiftKey) {
+        e.preventDefault()
+        openTerra()
         return
       }
       if (e.key === 'Escape') {
@@ -211,10 +156,9 @@ export default function Layout() {
     return () => window.removeEventListener('keydown', onKey)
   }, [nav])
 
-  // A new page opens at its top. Navigation used to keep the old scroll
-  // offset, so leaving a long page dropped you at the bottom of the next.
-  // Layout effect, and ahead of the motion hook: the page swap's snapshot and
-  // the entrance measurements both need the new page already at the top.
+  // A new page opens at its top. Layout effect, and ahead of the motion hook:
+  // the page swap's snapshot and the entrance measurements both need the new
+  // page already at the top.
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [loc.pathname])
@@ -223,152 +167,118 @@ export default function Layout() {
   useLinkSwap()
   const dim = useDim()
 
-  const openFlags = instabilities.filter((i) => i.status === 'open').length
-  const title = TITLES[loc.pathname] ?? 'WilliamsLab'
-  const accent = ACCENT[loc.pathname] ?? '#1746d1'
-  // Overlays portal out to <body>, outside .main — give them the accent too.
-  useEffect(() => {
-    document.documentElement.style.setProperty('--accent', accent)
-  }, [accent])
+  const included = state.review.studies.filter(analysisIncluded).length
 
   return (
-    <div className="shell">
+    <div className={`shell${contextOn ? ' ctx-on' : ''}`}>
       <DepthStage />
-      {navOpen && <div className="sb-drawer-backdrop" onClick={() => setNavOpen(false)} />}
-      <aside className={`sidebar${navOpen ? ' open' : ''}`}>
-        <div className="sb-brand">
-          <img className="wtile" src="/williams.png" alt="WilliamsLab" width={38} height={38} />
-          <div className="nm">
-            Williams<b>Lab</b>
-            <small>RESEARCH OS</small>
-          </div>
-          <button className="sb-close" onClick={() => setNavOpen(false)} aria-label="Close menu">✕</button>
+      <header className="topbar">
+        <button className="hamburger" onClick={() => setNavOpen(true)} aria-label="Open navigator">☰</button>
+        <Link className="brand" to="/" aria-label={`${BRAND.name} — project overview`}>
+          <span className="brand-full">studyex_medeetomilab<b>_</b></span>
+          <span className="brand-short">medeetomilab<b>_</b></span>
+        </Link>
+        <div className="tb-title">
+          <span className="tb-path" title={mod?.title}>{path.root}<b>{path.code}</b>{path.module && <i>/{path.module}</i>}</span>
         </div>
-        <nav className="sb-nav" aria-label="Main navigation">
-          {NAV.map((g) => {
-            const isCollapsed = collapsed.has(g.group)
-            return (
-              <div className={`sb-sec${isCollapsed ? ' collapsed' : ''}`} key={g.group}>
-                <button className="h" onClick={() => toggleGroup(g.group)} aria-expanded={!isCollapsed} title={isCollapsed ? `Show ${g.group}` : `Hide ${g.group}`}>
-                  <span className="chev">▾</span>
-                  {g.group}
-                </button>
-                {!isCollapsed && g.items.map((it) => (
-                  <NavLink
-                    key={it.to}
-                    to={it.to}
-                    end={it.end}
-                    onClick={() => setNavOpen(false)}
-                    style={{ ['--ic' as string]: it.color } as CSSProperties}
-                    className={({ isActive }) => `sb-link${isActive ? ' active' : ''}`}
-                  >
-                    <span className="ic" aria-hidden="true">{it.icon}</span>
-                    {it.label}
-                    {it.to === '/suspension' && openFlags > 0 && (
-                      <span className="fl" style={{ background: SEVERITY_COLOR.high }} title={`${openFlags} open`} />
-                    )}
-                  </NavLink>
-                ))}
-              </div>
-            )
-          })}
-        </nav>
-        <div className="sb-foot">
-          WilliamsLab · v0.1
-          <br />
-          Project {state.project.code}
-        </div>
-      </aside>
-
-      <div className="main" style={{ ['--accent' as string]: accent } as CSSProperties}>
-        <div className="topbar">
-          <button className="hamburger" onClick={() => setNavOpen(true)} aria-label="Open menu">☰</button>
-          <div className="tb-title">
-            <div className="title">{title}</div>
-            <div className="crumb">WILLIAMSLAB / {state.project.code}</div>
-          </div>
-          <div className="right">
-            <span className="undo-group">
-              <button className="icon-btn" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)">↶</button>
-              <button className="icon-btn" onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)">↷</button>
-            </span>
-            <button className="icon-btn cloud-trigger" onClick={() => setCloudOpen(true)} title="Cloud sync &amp; sharing" aria-label={`Cloud sync: ${cloudStatus?.message || 'Open settings'}`}>☁{cloudStatus && cloudStatus.phase !== 'paused' && <i className={`cloud-dot ${cloudStatus.phase}`} aria-hidden="true" />}</button>
-            <button className="icon-btn kbd-btn" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)">⌘</button>
-            <div className="proj-switch">
-              <button className="proj-chip" onClick={() => setProjMenu((v) => !v)} title={state.project.name}>{state.project.code} ▾</button>
-              {projMenu && (
-                <>
-                  <div className="proj-backdrop" onClick={() => setProjMenu(false)} />
-                  <div className="proj-menu">
-                    <div className="proj-menu-h">PROJECTS</div>
-                    {projects.map((p) => (
-                      <button key={p.id} className={`proj-item${p.id === activeId ? ' active' : ''}`} onClick={() => { switchProject(p.id); setProjMenu(false) }}>
-                        <b>{p.code}</b><span>{p.name}</span>
-                      </button>
-                    ))}
-                    <div className="proj-sep" />
-                    <button className="proj-item new" onClick={() => { const n = window.prompt('New review / project name'); if (n) createProject(n); setProjMenu(false) }}>＋ New review / project</button>
-                  </div>
-                </>
-              )}
-            </div>
-            <span className="gauge" title="Project rigor">
-              <span className="track">
-                <i style={{ width: `${Math.round(stability * 100)}%`, background: gaugeColor(stability) }} />
-              </span>
-              {Math.round(stability * 100)}%
-            </span>
-            <button
-              type="button"
-              className="toggle dim-toggle"
-              onClick={toggleDim}
-              aria-label="3D interface"
-              aria-pressed={dim === '3d'}
-              title={dim === '3d' ? 'Flatten to 2D (⇧D)' : 'Stand up in 3D (⇧D)'}
-            >
-              <span className="dim-cube" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
-              <span className="dim-label">{dim === '3d' ? '3D' : '2D'}</span>
+        <button className="tb-search" onClick={() => setPaletteOpen(true)} aria-label="Search project (⌘K)">
+          <span>search project…</span>
+          <kbd>⌘K</kbd>
+        </button>
+        <div className="right">
+          <span className="undo-group">
+            <button className="icon-btn" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)" aria-label="Undo">↶</button>
+            <button className="icon-btn" onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)" aria-label="Redo">↷</button>
+          </span>
+          <span className="tb-sep" />
+          <div className="proj-switch">
+            <button className="proj-chip" onClick={() => setProjMenu((v) => !v)} title={state.project.name} aria-haspopup="menu" aria-expanded={projMenu}>
+              <small>project</small>{state.project.code} ▾
             </button>
-            <select
-              className="toggle theme-select"
-              aria-label="Color theme"
-              title={preference === 'auto' ? `Auto follows your device · currently ${theme}` : `${theme === 'day' ? 'Day' : 'Night'} theme`}
-              value={preference}
-              onChange={(event) => setThemePreference(event.target.value as ThemePreference)}
-            >
-              <option value="auto">{theme === 'night' ? '☾' : '☀︎'} Auto</option>
-              <option value="day">☀︎ Day</option>
-              <option value="night">☾ Night</option>
-            </select>
+            {projMenu && (
+              <>
+                <div className="proj-backdrop" onClick={() => setProjMenu(false)} />
+                <div className="proj-menu" role="menu">
+                  <div className="proj-menu-h">projects · {projects.length}</div>
+                  {projects.map((p) => (
+                    <button key={p.id} role="menuitem" className={`proj-item${p.id === activeId ? ' active' : ''}`} onClick={() => { switchProject(p.id); setProjMenu(false) }}>
+                      <b>{p.code}</b><span>{p.name}</span><em>{p.id === activeId ? 'open' : (p.stage ?? '').toLowerCase()}</em>
+                    </button>
+                  ))}
+                  <div className="proj-sep" />
+                  <button className="proj-item new" role="menuitem" onClick={() => { const n = window.prompt('New project name'); if (n) createProject(n); setProjMenu(false) }}>＋ new project</button>
+                </div>
+              </>
+            )}
           </div>
-          <i className="tb-progress" aria-hidden="true" />
+          <Tag tone={run.tone === 'idle' ? 'idle' : run.tone}>{run.label}</Tag>
+          <span className="tb-sep" />
+          <button className="icon-btn terra-btn" onClick={() => openTerra()} title={terraReady ? 'Terra — the intelligence layer (⇧T)' : 'Terra is off — add an OpenAI key in Knowledge review → Settings'}>
+            terra<i className={`st-dot ${terraReady ? 'is-ready' : 'is-empty'}`} aria-hidden="true" />
+          </button>
+          <button className="icon-btn cloud-trigger" onClick={() => setCloudOpen(true)} title="Cloud: project state and sync" aria-label={`Cloud sync: ${cloudStatus?.message || 'open settings'}`}>cloud{cloudStatus && cloudStatus.phase !== 'paused' && <i className={`cloud-dot ${cloudStatus.phase}`} aria-hidden="true" />}</button>
+          <button className="icon-btn ctx-btn" onClick={toggleContext} aria-pressed={contextOn} title={contextOn ? 'Hide the context panel' : 'Show the context panel'}>ctx</button>
+          <button type="button" className="icon-btn dim-toggle" onClick={toggleDim} aria-label="3D view" aria-pressed={dim === '3d'} title={dim === '3d' ? 'Flatten the interface (⇧D)' : 'Show the interface in 3D (⇧D)'}>
+            <span className="dim-cube" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
+            <span className="dim-label">{dim}</span>
+          </button>
+          <select
+            className="toggle theme-select"
+            aria-label="Color theme"
+            title={preference === 'auto' ? `auto · follows this device (currently ${theme === 'night' ? 'dark' : 'light'})` : `${theme === 'night' ? 'dark' : 'light'} theme`}
+            value={preference}
+            onChange={(event) => setThemePreference(event.target.value as ThemePreference)}
+          >
+            <option value="night">dark</option>
+            <option value="day">light</option>
+            <option value="auto">auto</option>
+          </select>
+          <button className="icon-btn kbd-btn" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
         </div>
+        <i className="tb-progress" aria-hidden="true" />
+      </header>
+
+      {navOpen && <div className="sb-drawer-backdrop" onClick={() => setNavOpen(false)} />}
+      <PipelineNav stages={stages} open={navOpen} openFlags={openFlags} onClose={() => setNavOpen(false)} />
+
+      <main className="main" id="main">
         <div className="content">
           <Suspense fallback={<RouteSkeleton path={loc.pathname} />}>
             <Outlet />
           </Suspense>
         </div>
-        <footer className="workspace-footer">
-          <span>WilliamsLab <span className="footer-slash" aria-hidden="true">/</span> Research OS</span>
-          <span className="footer-signature"><Rule /> Machine 03</span>
-        </footer>
-      </div>
+      </main>
+
+      {contextOn && (
+        <ContextPanel state={state} stages={stages} instabilities={instabilities} stability={stability} sync={cloudStatus} terraReady={terraReady} module={mod} />
+      )}
+
+      <StatusBar
+        facts={{ code: state.project.code, records: state.review.screening?.length ?? 0, included, rigor: stability, openIssues: openFlags, terraReady, dim }}
+        sync={cloudStatus}
+        onCloud={() => setCloudOpen(true)}
+        onTerra={() => openTerra()}
+        onPalette={() => setPaletteOpen(true)}
+        onDim={toggleDim}
+      />
+
       <AssistantDock key={activeId} />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         onSetTheme={setThemePreference}
-        onOpenCopilot={() => window.dispatchEvent(new CustomEvent('wl-open-copilot'))}
+        onOpenCopilot={() => openTerra()}
+        onOpenCloud={() => setCloudOpen(true)}
       />
       <Cloud open={cloudOpen} onClose={() => setCloudOpen(false)} onSyncStatus={setCloudStatus} />
 
       {help && (
         <Portal>
           <div className="kbd-overlay" onClick={() => setHelp(false)}>
-            <div className="kbd-card" onClick={(e) => e.stopPropagation()}>
+            <div className="kbd-card" role="dialog" aria-label="Keyboard shortcuts" onClick={(e) => e.stopPropagation()}>
               <div className="kbd-head">
-                <b>Keyboard shortcuts</b>
-                <button className="ai-x" onClick={() => setHelp(false)} aria-label="Close">✕</button>
+                <b>keyboard</b>
+                <button className="modal-x" onClick={() => setHelp(false)} aria-label="Close">✕</button>
               </div>
               <div className="kbd-list">
                 {SHORTCUTS.map((s) => (

@@ -84,8 +84,10 @@ interface StoreCtx {
   // papers
   addPaper: (p: Omit<Paper, 'id'> & { id?: string }, linkHypothesisId?: string) => string
   removePaper: (id: string) => void
+  updatePaper: (id: string, patch: Partial<Paper>) => void
   // systematic review
-  updateReview: (patch: Partial<Review>) => void
+  /** patch the review; with `log`, the change is also written to the activity log (an audit line) */
+  updateReview: (patch: Partial<Review>, log?: { kind: string; text: string }) => void
   updatePrisma: (patch: Partial<Review['prisma']>) => void
   addStudy: (s: Omit<Study, 'id'> & { id?: string }) => string
   addStudies: (list: (Omit<Study, 'id'> & { id?: string })[]) => void
@@ -337,8 +339,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         edges: s.edges.filter((e) => e.src !== id && e.dst !== id),
         hypotheses: s.hypotheses.map((h) => ({ ...h, supportingPapers: (h.supportingPapers ?? []).filter((x) => x !== id) })),
       })),
+    updatePaper: (id, patch) => setState((s) => ({ ...s, papers: s.papers.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
 
-    updateReview: (patch) => setState((s) => ({ ...s, review: { ...s.review, ...patch } })),
+    updateReview: (patch, log) => setState((s) => ({ ...s, review: { ...s.review, ...patch }, ...(log ? { activity: act(s, log.kind, log.text) } : {}) })),
     updatePrisma: (patch) => setState((s) => ({ ...s, review: { ...s.review, prisma: { ...s.review.prisma, ...patch } } })),
     addStudy: (st) => {
       const id = st.id ?? uid('st')

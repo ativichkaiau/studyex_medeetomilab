@@ -1,6 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { Kicker, Rule, StatCard } from '../components/ui'
+import { Kicker, MetaGrid, Tag, Empty } from '../components/ui'
+import { analysisIncluded } from '../lib/cohorts'
+import { studyId } from '../lib/ids'
+import { datasetFingerprint, makeRun, runId } from '../lib/analysisRuns'
+import { stamp } from '../lib/projectFacts'
+import { openTerra, TERRA_TASKS } from '../lib/terra'
 import { Markdown } from '../components/Markdown'
 import { Sk } from '../components/Skeleton'
 import { ForestPlot, FunnelPlot } from '../components/srmaPlots'
@@ -20,7 +26,8 @@ const MODERATORS: Record<string, { label: string; fn: (s: Study) => number | nul
   n: { label: 'Total sample size', fn: (s) => { const t = (s.expTotal ?? 0) + (s.ctrlTotal ?? 0) + (s.n1 ?? 0) + (s.n2 ?? 0); return t || null } },
   ctrlRate: { label: 'Control event rate', fn: (s) => (s.ctrlTotal ? (s.ctrlEvents ?? 0) / s.ctrlTotal : null) },
 }
-const CERT: Record<string, string> = { High: '#12b981', Moderate: '#1746d1', Low: '#f59e0b', 'Very low': '#e2001a' }
+// carry white text in both themes
+const CERT: Record<string, string> = { High: '#2f8a5c', Moderate: '#3b5ff0', Low: '#94650f', 'Very low': '#b23b3b' }
 
 export default function MetaAnalysis() {
   const { state, updateReview } = useStore()
@@ -55,12 +62,21 @@ export default function MetaAnalysis() {
   const sig = meta.k > 0 && (meta.pooledLow > meta.refValue || meta.pooledHigh < meta.refValue)
   const setGrade = (patch: Record<string, string>) => updateReview({ grade: { design: r.grade?.design ?? 'observational', ...(r.grade || {}), ...patch } as typeof r.grade })
 
+  const runs = r.runs ?? []
+  const lastRun = runs[0]
+  const fingerprint = useMemo(() => datasetFingerprint(r), [r])
+  const unparsed = r.studies.filter(analysisIncluded).filter((x) => !meta.rows.some((row) => row.id === x.id))
+  function logRun() {
+    const run = makeRun(r)
+    updateReview({ runs: [run, ...runs].slice(0, 50) }, { kind: 'analysis', text: `${runId(run.n)} ${run.status}: ${run.status === 'success' && run.pooled ? `${run.effect} ${fmt(run.pooled.est)} [${fmt(run.pooled.low)}, ${fmt(run.pooled.high)}], k = ${run.k}` : run.reason}` })
+  }
+
   const [aiText, setAiText] = useState('')
   const [aiOn, setAiOn] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   async function draft() {
     if (aiOn) return
-    if (!hasKey()) { setAiText('_Set an OpenAI key in Knowledge Review → Settings._'); return }
+    if (!hasKey()) { setAiText('_Terra is off — add an OpenAI key in Knowledge review → Settings._'); return }
     setAiText(''); setAiOn(true)
     const studies = meta.rows.map((x) => `${x.label}: ${r.effect} ${fmt(x.est)} [${fmt(x.low)}, ${fmt(x.high)}], weight ${fmt(x.weight, 1)}%`).join('; ')
     const messages: ChatMessage[] = [
@@ -76,45 +92,96 @@ export default function MetaAnalysis() {
   return (
     <>
       <div className="page-head">
-        <Rule />
-        <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <Kicker>SYSTEMATIC REVIEW · META-ANALYSIS</Kicker>
-            <h1 style={{ marginTop: 12 }}>Meta-analysis</h1>
-            <p>{r.indexLabel} vs {r.comparatorLabel} → {r.outcomeLabel}. Inverse-variance pooling with heterogeneity, subgroup, sensitivity, publication-bias and GRADE.</p>
+        <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            <Kicker>pipeline / 06 statistics · compute</Kicker>
+            <h1>Statistics</h1>
+            <p><span className="mono">{r.indexLabel || 'index'} vs {r.comparatorLabel || 'comparator'} → {r.outcomeLabel || 'outcome'}</span>. Inverse-variance pooling with heterogeneity, subgroup, sensitivity, publication-bias and GRADE; computed live from <Link to="/studies">extraction</Link>, logged on demand.</p>
           </div>
-          <div className="row-actions" style={{ flex: 'none', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <select className="select" style={{ width: 175 }} value={r.effect} onChange={(e) => updateReview({ effect: e.target.value as EffectMeasure })}>
+          <div className="row-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <select className="select" style={{ width: 175 }} value={r.effect} onChange={(e) => updateReview({ effect: e.target.value as EffectMeasure })} aria-label="Effect measure">
               {MEASURES.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
             </select>
-            <div className="seg">
-              <button className={`seg-b${r.model === 'random' ? ' on' : ''}`} onClick={() => updateReview({ model: 'random' })}>Random</button>
-              <button className={`seg-b${r.model === 'fixed' ? ' on' : ''}`} onClick={() => updateReview({ model: 'fixed' })}>Fixed</button>
+            <div className="seg" role="group" aria-label="Model">
+              <button className={`seg-b${r.model === 'random' ? ' on' : ''}`} aria-pressed={r.model === 'random'} onClick={() => updateReview({ model: 'random' })}>random</button>
+              <button className={`seg-b${r.model === 'fixed' ? ' on' : ''}`} aria-pressed={r.model === 'fixed'} onClick={() => updateReview({ model: 'fixed' })}>fixed</button>
             </div>
+            <button className="btn primary sm" onClick={logRun}>log run</button>
           </div>
         </div>
       </div>
 
-      {meta.k === 0 && <div className="err" style={{ background: 'var(--warn)', color: 'var(--warn-ink)', border: '1px solid color-mix(in srgb,var(--amber) 30%,var(--line))', marginBottom: 16 }}>No studies have usable data for <b>{measureInfo(r.effect).label}</b>. {binary ? 'Add 2×2 event counts' : 'Add mean / SD / n per group'} on the Studies page.</div>}
-
-      {integrity.length > 0 && (
-        <div className="card" style={{ marginBottom: 16, borderLeft: `4px solid ${integrity.some((i) => i.level === 'error') ? 'var(--red)' : 'var(--amber)'}` }}>
-          <div className="card-h"><span className="sq" style={{ background: integrity.some((i) => i.level === 'error') ? 'var(--red)' : 'var(--amber)' }} />DATA CHECKS · {integrity.length} flag{integrity.length === 1 ? '' : 's'}</div>
-          {integrity.slice(0, 8).map((i, idx) => (
-            <div className="he-row" key={idx}>
-              <span className={`vbadge ${i.level === 'error' ? 'v-exclude' : 'v-maybe'}`}>{i.level}</span>
-              <span className="he-lab"><b>{i.study}</b> — {i.msg}</span>
-            </div>
-          ))}
-          <p className="small" style={{ marginTop: 8 }}>Errors block a study from pooling correctly; warnings (zero cells, double-zeros) are handled automatically but worth noting in the manuscript.</p>
+      {meta.k < 2 && (
+        <div className="fail-panel">
+          <div className="fail-h mono">ANALYSIS_BLOCKED</div>
+          <MetaGrid className="wide" rows={[
+            ['reason', `insufficient studies with ${binary ? '2×2 event counts' : 'mean / SD / n'} for ${measureInfo(r.effect).label} (k = ${meta.k}, needs ≥ 2)`],
+            ['affected studies', unparsed.length ? <span className="mono">{unparsed.map((x) => studyId(x.id)).join(' · ')}</span> : <span className="muted">no included studies yet</span>],
+            ['action', 'inspect extraction'],
+          ]} />
+          <Link className="btn sm" to="/studies" style={{ marginTop: 10 }}>inspect extraction →</Link>
         </div>
       )}
 
-      <div className="grid g4" style={{ marginBottom: 16 }}>
-        <StatCard value={`${fmt(meta.pooledEst)}`} label={`Pooled ${r.effect}`} sub={`[${fmt(meta.pooledLow)}, ${fmt(meta.pooledHigh)}]`} tone={sig ? '#e2001a' : '#5b6480'} />
-        <StatCard value={`${fmt(meta.I2, 0)}%`} label="I² heterogeneity" sub={`τ²=${fmt(meta.tau2, 3)}`} tone="#f59e0b" />
-        <StatCard value={meta.k} label="Studies pooled" sub={`${r.studies.length - meta.k} not pooled`} tone="#7c3aed" />
-        <StatCard value={binary ? totalEvents : totalN} label={binary ? 'Events' : 'Participants'} sub={binary ? `of ${totalN} patients` : `${meta.k} studies`} tone="#12b981" />
+      {integrity.length > 0 && (
+        <div className="card" style={{ marginBottom: 12, borderLeft: `2px solid ${integrity.some((i) => i.level === 'error') ? 'var(--danger)' : 'var(--warning)'}` }}>
+          <div className="card-h">data checks · {integrity.length} flag{integrity.length === 1 ? '' : 's'}</div>
+          {integrity.slice(0, 8).map((i, idx) => (
+            <div className="he-row" key={idx}>
+              <Tag tone={i.level === 'error' ? 'bad' : 'warn'}>{i.level}</Tag>
+              <span className="he-lab"><b>{i.study}</b> — {i.msg}</span>
+            </div>
+          ))}
+          <p className="small" style={{ marginTop: 8 }}>Errors block a study from pooling correctly; warnings (zero cells, double-zeros) are handled automatically but worth reporting.</p>
+        </div>
+      )}
+
+      <div className="stat-grid">
+        <div className="card">
+          <div className="card-h">analysis · {r.outcomeLabel || 'outcome'} <span className="spacer" />{meta.k >= 2 ? <Tag tone="ok">computed</Tag> : <Tag tone="warn">blocked</Tag>}</div>
+          <MetaGrid className="wide" rows={[
+            ['outcome', r.outcomeLabel || <span className="muted">—</span>],
+            ['effect', <span className="mono">{r.effect} · {measureInfo(r.effect).label}</span>],
+            ['model', <span className="mono">{r.model === 'random' ? 'random-effects (DerSimonian–Laird)' : 'fixed-effect (inverse variance)'}</span>],
+            ['k', <span className="mono">{meta.k}{r.studies.length - meta.k > 0 ? <span className="muted"> · {r.studies.length - meta.k} not pooled</span> : null}</span>],
+            ['pooled', <span className="mono"><b>{fmt(meta.pooledEst)}</b>{sig && meta.k >= 2 ? <span className="tone-info"> · significant</span> : null}</span>],
+            ['95% CI', <span className="mono">[{fmt(meta.pooledLow)}, {fmt(meta.pooledHigh)}]</span>],
+            ['prediction', r.model === 'random' && meta.k >= 3 ? <span className="mono">[{fmt(meta.predLow)}, {fmt(meta.predHigh)}]</span> : <span className="muted mono">—</span>],
+            ['I²', <span className="mono">{fmt(meta.I2, 0)}%</span>],
+            ['τ²', <span className="mono">{fmt(meta.tau2, 3)}</span>],
+            ['Q', <span className="mono">{fmt(meta.Q)} · df {meta.df} · p {fmt(meta.pValue, 3)}</span>],
+            [binary ? 'events' : 'participants', <span className="mono">{binary ? `${totalEvents} / ${totalN}` : totalN}</span>],
+            ['dataset', <span className="mono">{fingerprint}{lastRun ? (lastRun.dataset === fingerprint ? <span className="tone-ok"> · matches {runId(lastRun.n)}</span> : <span className="tone-warn"> · changed since {runId(lastRun.n)}</span>) : <span className="muted"> · no run logged</span>}</span>],
+          ]} />
+          <div className="wrap-gap" style={{ marginTop: 10 }}>
+            {TERRA_TASKS.statistics.map((t) => <button key={t.label} className="go" onClick={() => openTerra({ prompt: t.prompt })}>terra · {t.label} →</button>)}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-h">analysis log <span className="spacer" /><span style={{ textTransform: 'none', letterSpacing: 0 }}>{runs.length} run{runs.length === 1 ? '' : 's'}</span></div>
+          {runs.length === 0 ? <Empty path="analysis:">no runs — <button className="go" onClick={logRun}>log the current analysis →</button></Empty> : (
+            <div className="run-list">
+              {runs.slice(0, 8).map((run) => (
+                <details key={run.id} className="run">
+                  <summary>
+                    <span className="mono">{runId(run.n)}</span>
+                    <span className="mono muted">{stamp(run.ts)}</span>
+                    <span className="mono run-res">{run.status === 'success' && run.pooled ? `${run.effect} ${fmt(run.pooled.est)} [${fmt(run.pooled.low)}, ${fmt(run.pooled.high)}]` : run.reason}</span>
+                    <Tag tone={run.status === 'success' ? 'ok' : 'bad'}>{run.status}</Tag>
+                  </summary>
+                  <MetaGrid rows={[
+                    ['outcome', run.outcome],
+                    ['dataset', <span className="mono">{run.dataset}{run.dataset === fingerprint ? ' · current' : ''}</span>],
+                    ['model', <span className="mono">{run.model}-effect{run.model === 'random' ? 's' : ''} · {run.effect}</span>],
+                    ['k', <span className="mono">{run.k}</span>],
+                    ...(run.het ? [['heterogeneity', <span className="mono">I² {fmt(run.het.I2, 0)}% · τ² {fmt(run.het.tau2, 3)} · Q {fmt(run.het.Q)} (df {run.het.df}, p {fmt(run.het.p, 3)})</span>] as [string, JSX.Element]] : []),
+                    ['studies', <span className="mono">{run.studies.map(studyId).join(' · ') || '—'}</span>],
+                  ]} />
+                </details>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="card lg" style={{ marginBottom: 16 }}>
@@ -339,10 +406,10 @@ export default function MetaAnalysis() {
 
       <div className="card lg rail" style={{ marginTop: 16 }}>
         <div className="card-h" style={{ justifyContent: 'space-between' }}>
-          <span><span className="sq" style={{ background: 'var(--accent, var(--blue))' }} />RESULTS PARAGRAPH · AI DRAFT</span>
-          {aiOn ? <button className="icon-btn" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn primary sm" onClick={draft}>✦ Draft</button>}
+          <span>results paragraph · terra draft</span>
+          {aiOn ? <button className="icon-btn" onClick={() => abortRef.current?.abort()}>stop</button> : <button className="btn primary sm" onClick={draft}>draft →</button>}
         </div>
-        {aiText ? <Markdown text={aiText} /> : aiOn ? <Sk kind="results" /> : <p className="small">Draft a publication-style results paragraph from the pooled estimate, heterogeneity and GRADE.</p>}
+        {aiText ? <Markdown text={aiText} /> : aiOn ? <Sk kind="results" /> : <p className="small">Terra drafts a publication-style results paragraph from the pooled estimate, heterogeneity and GRADE — one call on your OpenAI key; verify every number against the analysis above.</p>}
       </div>
     </>
   )

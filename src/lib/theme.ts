@@ -7,14 +7,16 @@ type Theme = Exclude<ThemePreference, 'auto'>
 const STORAGE_KEY = 'williamslab.theme'
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
+// Dark-first: with no saved choice the runtime starts on the graphite theme.
+// 'auto' (follow the device) remains a choice, and is saved like the others.
 function readPreference(): ThemePreference {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'day' || saved === 'night') return saved
+    if (saved === 'day' || saved === 'night' || saved === 'auto') return saved
   } catch {
-    // Auto still works when browser storage is unavailable.
+    // the default still applies when browser storage is unavailable
   }
-  return 'auto'
+  return 'night'
 }
 
 export function useTheme() {
