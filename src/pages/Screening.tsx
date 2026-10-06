@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, MetaGrid, Tag, Empty, type Tone } from '../components/ui'
 import { Modal } from '../components/Modal'
@@ -50,8 +50,13 @@ export default function Screening() {
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
   const [params] = useSearchParams()
+  const location = useLocation()
   // a deep link (?rec=<id>) opens that record in the inspector
   const [selId, setSelId] = useState<string | null>(() => params.get('rec'))
+  useEffect(() => {
+    const id = params.get('rec')
+    if (id) { setFilter('all'); setQuery(''); setSelId(id) }
+  }, [location.key]) // a search result can target a record on this same route
   const [adding, setAdding] = useState<{ text: string; loading: boolean; error?: string } | null>(null)
   const [busyAbstract, setBusyAbstract] = useState<Set<string>>(new Set())
   const [failedAbstract, setFailedAbstract] = useState<Set<string>>(new Set())

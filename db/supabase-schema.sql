@@ -1,5 +1,5 @@
 -- ============================================================
--- WilliamsLab · Supabase cloud schema
+-- studyex_medeetomilab · Supabase cloud schema
 -- Run this once in your Supabase project → SQL Editor → New query.
 -- Then connect from the app (☁ Cloud button) with the project URL and the
 -- anon public key. Email magic-link auth works out of the box

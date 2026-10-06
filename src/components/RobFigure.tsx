@@ -1,6 +1,6 @@
 import type { RobLevel, Study } from '../types'
 import { analysisIncluded } from '../lib/cohorts'
-import { overallRob } from '../lib/rob'
+import { overallRob, robComplete } from '../lib/rob'
 
 // legacy token names on purpose: figure export snapshots these (lib/figureExport.ts)
 const FILL: Record<RobLevel, string> = { low: 'var(--green)', some: 'var(--amber)', high: 'var(--red)' }
@@ -25,7 +25,7 @@ export function RobFigure({ studies, domains, tool }: { studies: Study[]; domain
   const width = barX + barW + 150
   const legendY = Math.max(top + rowsH, top + cols.length * 24) + 22
   const height = legendY + 18 + domains.length * 15 + 10
-  const value = (s: Study, key: string): RobLevel | undefined => (key === '__overall' ? overallRob(s, domains) : s.rob?.[key])
+  const value = (s: Study, key: string): RobLevel | undefined => (key === '__overall' ? robComplete(s, domains) ? overallRob(s, domains) : undefined : s.rob?.[key])
   const share = (key: string) => {
     const n = incl.length || 1
     const vals = incl.map((s) => value(s, key))

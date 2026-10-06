@@ -10,7 +10,7 @@ import { openTerra, TERRA_TASKS } from '../lib/terra'
 import { getModel } from '../lib/openai'
 import { listSearches } from '../lib/savedSearches'
 import { syncWord } from './StatusBar'
-import { reviewType } from '../lib/projectFacts'
+import { isRegistered, reviewType } from '../lib/projectFacts'
 
 const SEV_ORDER = { high: 0, med: 1, low: 2 } as const
 
@@ -50,7 +50,7 @@ export default function ContextPanel({ state, stages, instabilities, stability, 
           ['id', <span className="mono">{state.project.code}</span>],
           ['type', reviewType(state)],
           ['stage', <span className="mono">{(state.project.stage ?? '—').toLowerCase()}</span>],
-          ['protocol', r.registration?.trim() || state.project.preRegistered ? <Tag tone="ok">registered</Tag> : <Tag tone="warn">not registered</Tag>],
+          ['protocol', isRegistered(state) ? <Tag tone="ok">registered</Tag> : <Tag tone="warn">not registered</Tag>],
         ]} />
       </section>
 

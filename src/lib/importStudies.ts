@@ -1,4 +1,4 @@
-import type { Study } from '../types'
+import type { Study, RobLevel } from '../types'
 
 // ============================================================
 // Import studies from a CSV (with optional 2×2 counts) or an
@@ -33,29 +33,39 @@ export function parseStudies(text: string): ImportResult {
 }
 
 // ---- CSV ----
-function splitCSVLine(line: string): string[] {
-  const out: string[] = []
+function splitCSVRows(text: string): string[][] {
+  const rows: string[][] = []
+  let row: string[] = []
   let cur = ''
   let q = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
     if (q) {
       if (ch === '"') {
-        if (line[i + 1] === '"') { cur += '"'; i++ } else q = false
+        if (text[i + 1] === '"') { cur += '"'; i++ } else q = false
       } else cur += ch
     } else if (ch === '"') q = true
-    else if (ch === ',') { out.push(cur); cur = '' }
+    else if (ch === ',') { row.push(cur); cur = '' }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++
+      row.push(cur)
+      if (row.some((cell) => cell.trim())) rows.push(row)
+      row = []
+      cur = ''
+    }
     else cur += ch
   }
-  out.push(cur)
-  return out
+  row.push(cur)
+  if (row.some((cell) => cell.trim())) rows.push(row)
+  return rows
 }
 
 function parseCSV(text: string): { studies: NewStudy[]; warnings: string[] } {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '')
+  const rows = splitCSVRows(text)
   const warnings: string[] = []
-  if (lines.length < 2) return { studies: [], warnings: ['No data rows found.'] }
-  const header = splitCSVLine(lines[0]).map(norm)
+  if (rows.length < 2) return { studies: [], warnings: ['No data rows found.'] }
+  const rawHeader = rows[0]
+  const header = rawHeader.map(norm)
   const idx = (aliases: string[]) => {
     for (const a of aliases) {
       const i = header.indexOf(norm(a))
@@ -86,14 +96,23 @@ function parseCSV(text: string): { studies: NewStudy[]; warnings: string[] } {
     sd2: idx(['sd2', 'controlsd', 'stdev2', 'sdcontrol']),
     n2: idx(['n2', 'controln', 'ngroup2']),
     subgroup: idx(['subgroup', 'group', 'stratum']),
+    include: idx(['include', 'included', 'poolinginclude']),
+    note: idx(['note', 'notes']),
   }
+  const robColumns = rawHeader.flatMap((name, i) => name.toLowerCase().startsWith('rob:') ? [{ domain: name.slice(4), i }] : [])
   const studies: NewStudy[] = []
-  for (let r = 1; r < lines.length; r++) {
-    const f = splitCSVLine(lines[r])
+  for (let r = 1; r < rows.length; r++) {
+    const f = rows[r]
     const g = (i: number) => (i >= 0 ? (f[i] ?? '').trim() : '')
     const authorRaw = g(cols.author) || `Study ${r}`
+    const rob: Record<string, RobLevel> = {}
+    robColumns.forEach(({ domain, i }) => {
+      const level = g(i)
+      if (level === 'low' || level === 'some' || level === 'high') rob[domain] = level
+    })
+    const includeValue = g(cols.include).toLowerCase()
     studies.push({
-      author: authorRaw.replace(/(,| and | et al).*$/i, '').trim() || `Study ${r}`,
+      author: authorRaw,
       year: toNum(g(cols.year)) ?? 0,
       pmid: g(cols.pmid) || undefined,
       doi: g(cols.doi) || undefined,
@@ -110,7 +129,9 @@ function parseCSV(text: string): { studies: NewStudy[]; warnings: string[] } {
       sd2: toFloat(g(cols.sd2)),
       n2: toNum(g(cols.n2)),
       subgroup: g(cols.subgroup) || undefined,
-      include: true,
+      include: cols.include < 0 || !['no', 'false', '0', 'exclude', 'excluded'].includes(includeValue),
+      rob: Object.keys(rob).length ? rob : undefined,
+      note: cols.note >= 0 ? f[cols.note] || undefined : undefined,
     })
   }
   if (cols.author < 0) warnings.push('No author/study column found — using row numbers.')

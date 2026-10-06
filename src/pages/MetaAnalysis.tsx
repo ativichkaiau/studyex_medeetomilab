@@ -216,7 +216,7 @@ export default function MetaAnalysis() {
       <div className="card lg" style={{ marginTop: 16 }}>
         <div className="card-h" style={{ justifyContent: 'space-between' }}>
           <span><span className="sq" style={{ background: 'var(--violet)' }} />SUBGROUP ANALYSIS</span>
-          <select className="select" style={{ width: 210 }} value={groupBy} onChange={(e) => setGroupBy(e.target.value as keyof typeof GROUPINGS)}>
+          <select className="select" aria-label="Subgroup variable" style={{ width: 210 }} value={groupBy} onChange={(e) => setGroupBy(e.target.value as keyof typeof GROUPINGS)}>
             {Object.entries(GROUPINGS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
         </div>
@@ -318,7 +318,7 @@ export default function MetaAnalysis() {
         <div className="card lg">
           <div className="card-h" style={{ justifyContent: 'space-between' }}>
             <span><span className="sq" style={{ background: 'var(--navy)' }} />META-REGRESSION</span>
-            <select className="select" style={{ width: 190 }} value={moderator} onChange={(e) => setModerator(e.target.value as keyof typeof MODERATORS)}>
+            <select className="select" aria-label="Meta-regression moderator" style={{ width: 190 }} value={moderator} onChange={(e) => setModerator(e.target.value as keyof typeof MODERATORS)}>
               {Object.entries(MODERATORS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
           </div>
@@ -354,7 +354,7 @@ export default function MetaAnalysis() {
       <div className="card lg" style={{ marginTop: 16, borderLeft: `4px solid ${CERT[grade.certainty]}` }}>
         <div className="card-h" style={{ justifyContent: 'space-between' }}>
           <span><span className="sq" style={{ background: CERT[grade.certainty] }} />GRADE · CERTAINTY OF EVIDENCE</span>
-          <select className="select" style={{ width: 200 }} value={r.grade?.design ?? 'observational'} onChange={(e) => setGrade({ design: e.target.value })}>
+          <select className="select" aria-label="GRADE study design" style={{ width: 200 }} value={r.grade?.design ?? 'observational'} onChange={(e) => setGrade({ design: e.target.value })}>
             <option value="observational">Observational studies</option>
             <option value="rct">Randomised trials</option>
           </select>
@@ -372,7 +372,7 @@ export default function MetaAnalysis() {
                 return (
                   <tr key={d.key}>
                     <td><b>{d.label}</b></td>
-                    <td><select className="select" style={{ minWidth: 150 }} value={d.judgment} onChange={(e) => setGrade({ [d.key]: e.target.value })}>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select> {d.judgment !== d.auto && <span className="small">(auto: {d.auto})</span>}</td>
+                    <td><select className="select" aria-label={`${d.label} judgment`} style={{ minWidth: 150 }} value={d.judgment} onChange={(e) => setGrade({ [d.key]: e.target.value })}>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select> {d.judgment !== d.auto && <span className="small">(auto: {d.auto})</span>}</td>
                     <td className="mono">{d.drop ? `−${d.drop}` : '0'}</td>
                   </tr>
                 )
@@ -380,7 +380,7 @@ export default function MetaAnalysis() {
               {(r.grade?.design ?? 'observational') !== 'rct' && (
                 <tr>
                   <td><b>Large effect (upgrade)</b></td>
-                  <td><select className="select" style={{ minWidth: 150 }} value={grade.upgradeLabel} onChange={(e) => setGrade({ largeEffect: e.target.value })}><option value="none">none</option><option value="large">large</option><option value="very large">very large</option></select></td>
+                  <td><select className="select" aria-label="Large effect upgrade" style={{ minWidth: 150 }} value={grade.upgradeLabel} onChange={(e) => setGrade({ largeEffect: e.target.value })}><option value="none">none</option><option value="large">large</option><option value="very large">very large</option></select></td>
                   <td className="mono">{grade.upgrade ? `+${grade.upgrade}` : '0'}</td>
                 </tr>
               )}

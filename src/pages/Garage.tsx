@@ -8,7 +8,7 @@ import { analysisIncluded } from '../lib/cohorts'
 import { hasCuratedTheory } from '../lib/projectTheory'
 import { pipeline } from '../lib/pipeline'
 import { rigorId } from '../lib/ids'
-import { reviewType, stamp } from '../lib/projectFacts'
+import { isRegistered, reviewType, stamp } from '../lib/projectFacts'
 import { exportName, BRAND } from '../lib/brand'
 import { openTerra, TERRA_TASKS } from '../lib/terra'
 import EcgMonitor from '../components/EcgMonitor'
@@ -36,7 +36,7 @@ export default function Garage() {
   const stageIdx = Math.max(0, STAGES.indexOf(stage as (typeof STAGES)[number]))
   const rv = state.review
   const incl = rv.studies.filter(analysisIncluded)
-  const registered = !!rv.registration?.trim() || state.project.preRegistered
+  const registered = isRegistered(state)
 
   // milestones, each read from the project
   const signals: { label: string; done: boolean }[] = [

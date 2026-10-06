@@ -240,6 +240,7 @@ td.mono.r{white-space:nowrap}
 .pr-figure{position:sticky; top:calc(var(--topbar-h) + 12px)}
 @media(max-width:1100px){.pr-figure{position:static}}
 .pr-trace{width:100%; border-collapse:collapse; min-width:0}
+.pr-col > .card:first-child{overflow-x:auto}
 .pr-trace td{padding:5px 16px; border-bottom:1px solid var(--border-subtle); font-size:12.5px; vertical-align:middle}
 .pr-trace tr:last-child td{border-bottom:0}
 .pr-trace tr:hover{background:transparent}
@@ -330,3 +331,25 @@ td.mono.r{white-space:nowrap}
 @media(max-width:1180px){.lit-inspector{border-left:0; border-top:1px solid var(--border-subtle)}}
 .lit-stance{width:auto; min-height:26px; padding:2px 6px; font-family:var(--font-mono); font-size:11.5px}
 .lit-tag{width:110px; min-height:26px; padding:2px 7px}
+.cloud-content{min-width:0}
+.cloud-overview{display:flex; align-items:center; justify-content:space-between; gap:14px; margin:-2px 0 16px; padding:0 0 14px; border-bottom:1px solid var(--border-subtle)}
+.cloud-overview>div{display:flex; flex-direction:column; min-width:0; gap:3px}
+.cloud-overview .mono{font-size:10.5px; color:var(--text-muted); overflow-wrap:anywhere}
+.cloud-overview strong{font-size:16px; font-weight:600; color:var(--text-primary)}
+.cloud-overview small{font-size:11.5px; color:var(--text-secondary); overflow-wrap:anywhere}
+.cloud-phase{flex:none; font:500 10px var(--font-mono); text-transform:uppercase; letter-spacing:.04em; padding:4px 7px; border:1px solid var(--border-strong); border-radius:var(--radius-xs); color:var(--text-muted); background:var(--bg-raised)}
+.cloud-phase.phase-synced{color:var(--success); border-color:color-mix(in srgb,var(--success) 35%,var(--border-strong)); background:var(--success-wash)}
+.cloud-phase.phase-checking{color:var(--accent-ink); border-color:var(--accent-line); background:var(--accent-wash)}
+.cloud-phase.phase-error,.cloud-phase.phase-offline,.cloud-phase.phase-conflict{color:var(--danger); border-color:color-mix(in srgb,var(--danger) 35%,var(--border-strong)); background:var(--danger-wash)}
+.cloud-content .kv{display:grid; grid-template-columns:108px minmax(0,1fr); gap:10px; align-items:start; padding:7px 0; border-bottom:1px solid var(--border-subtle)}
+.cloud-content .kv .k{width:auto; padding-top:1px}
+.cloud-content .kv .val{min-width:0; overflow-wrap:anywhere; color:var(--text-primary)}
+.cloud-content .kv .val input[type="checkbox"]{accent-color:var(--accent)}
+.cloud-content .divider{margin:16px 0}
+.cloud-content .card{background:var(--bg-raised); border-color:var(--border-strong)}
+.cloud-content .wrap-gap{gap:8px}
+.cloud-message{margin-top:12px; padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); font-size:12px; line-height:1.5}
+.cloud-message.ok{color:var(--success); background:var(--success-wash); border-color:color-mix(in srgb,var(--success) 35%,var(--border-strong))}
+.cloud-message.bad{color:var(--danger); background:var(--danger-wash); border-color:color-mix(in srgb,var(--danger) 35%,var(--border-strong))}
+.cohort-review h2{font-size:15px; line-height:1.3; font-weight:600; letter-spacing:0}
+@media(max-width:480px){.cloud-content .kv{grid-template-columns:1fr; gap:2px}.cloud-overview{align-items:flex-start}.cloud-phase{margin-top:2px}}

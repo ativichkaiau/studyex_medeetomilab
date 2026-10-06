@@ -1,5 +1,5 @@
 -- ============================================================
--- WilliamsLab — future backend path (graph-over-relational).
+-- studyex_medeetomilab — future backend path (graph-over-relational).
 -- v1 ships frontend-only (localStorage). Adopt this when you
 -- outgrow the browser: Postgres now, migrate to Neo4j only if
 -- traversal depth demands it. JSON `props` keeps types flexible.

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { MetaGrid, Tag, Empty, type Tone } from './ui'
 import { shortCode } from '../lib/ids'
@@ -27,7 +27,12 @@ export default function EvidenceRegistry() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [params] = useSearchParams()
+  const location = useLocation()
   const [selId, setSelId] = useState<string | null>(() => params.get('lit'))
+  useEffect(() => {
+    const id = params.get('lit')
+    if (id) { setQ(''); setSrc('all'); setStance('all'); setTag('all'); setFrom(''); setTo(''); setSelId(id) }
+  }, [location.key]) // same-page command palette searches still select their target
   const [tagDraft, setTagDraft] = useState('')
 
   const tags = useMemo(() => [...new Set(papers.flatMap((p) => p.tags ?? []))].sort(), [papers])

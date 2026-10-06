@@ -64,7 +64,7 @@ export const PHASES: PhaseDef[] = [
     deliverable: 'A foundational summary or concept map of the domain.',
     mentor: 'Point to key textbooks & landmark reviews; check understanding; correct misconceptions early.',
     acad: 'Match the group, set the schedule, and connect them to the research side.',
-    accent: '#1746d1',
+    accent: '#3b5ff0',
   },
   {
     n: 2,
@@ -75,7 +75,7 @@ export const PHASES: PhaseDef[] = [
     deliverable: 'Annotated key papers + a short synthesis of what is (and isn’t) known.',
     mentor: 'Suggest a search strategy & key papers; give feedback on the synthesis.',
     acad: 'Facilitate meetings, keep momentum, and may join the lit-review process.',
-    accent: '#0d9488',
+    accent: '#23766f',
   },
   {
     n: 3,
@@ -86,15 +86,15 @@ export const PHASES: PhaseDef[] = [
     deliverable: 'A Research Question, or a Reflection (the group’s research process, what they enjoyed, advice they’d want).',
     mentor: 'Judge whether the RQ is answerable & novel; support a compassionate drop-out if truly needed.',
     acad: 'Relay the output to the research side and arrange the presentation / feedback.',
-    accent: '#7c3aed',
+    accent: '#5f54b8',
   },
 ]
 
 export const OUTCOME_META: Record<GroupOutcome, { label: string; color: string; hint: string }> = {
   'in-progress': { label: 'In progress', color: '#5b6480', hint: 'Working through the phases.' },
-  'research-question': { label: 'Research Question', color: '#12b981', hint: 'Reached a novel, answerable question.' },
-  reflection: { label: 'Reflection', color: '#1746d1', hint: 'Pivoted to a reflection on the process — a valid outcome.' },
-  dropped: { label: 'Dropped (supported)', color: '#f59e0b', hint: 'Stepped out with mentor support — no penalty.' },
+  'research-question': { label: 'Research Question', color: '#2e7d4f', hint: 'Reached a novel, answerable question.' },
+  reflection: { label: 'Reflection', color: '#3b5ff0', hint: 'Pivoted to a reflection on the process — a valid outcome.' },
+  dropped: { label: 'Dropped (supported)', color: '#94650f', hint: 'Stepped out with mentor support — no penalty.' },
 }
 
 const uid = (p: string) => `${p}_${Math.random().toString(36).slice(2, 9)}`

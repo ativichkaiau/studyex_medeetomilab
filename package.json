@@ -1,9 +1,9 @@
 {
-  "name": "williamslab",
+  "name": "studyex-medeetomilab",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "WilliamsLab — a translational-research operating system. Machine 03 of the Williams-grade suite.",
+  "description": "studyex_medeetomilab — evidence synthesis and research runtime.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

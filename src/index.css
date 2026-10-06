@@ -139,6 +139,8 @@ kbd{font-family:var(--font-mono); font-size:10.5px; color:var(--text-secondary);
 .tb-search:hover{border-color:var(--text-faint); color:var(--text-secondary)}
 .tb-search span{flex:1}
 .topbar .right{display:flex; align-items:center; gap:4px; flex:none}
+.tb-tools{display:flex; align-items:center; gap:4px}
+.tb-tools-toggle{display:none!important}
 .tb-sep{width:1px; height:18px; background:var(--border-subtle); margin:0 4px}
 .topbar .icon-btn{border-color:transparent; background:transparent; color:var(--text-muted); min-width:28px; justify-content:center}
 .topbar .icon-btn:hover:not(:disabled){background:var(--bg-hover); color:var(--text-primary)}
@@ -282,14 +284,32 @@ a.sbar-item:hover,button.sbar-item:hover{background:var(--bg-hover); color:var(-
   .statusbar{display:none}
   .sidebar{bottom:0}
   .kbd-btn,.undo-group,.tb-sep{display:none}
+  .tb-tools-toggle{display:inline-flex!important}
+  .tb-tools{display:none; position:absolute; right:8px; top:calc(var(--topbar-h) + 4px); min-width:220px;
+    padding:10px; flex-wrap:wrap; justify-content:flex-start; background:var(--bg-panel); border:1px solid var(--border-strong);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-pop); z-index:42}
+  .tb-tools.open{display:flex}
+  .tb-tools .kbd-btn{display:inline-flex}
+  .tb-tools .theme-select{flex:1}
   .brand .brand-full{display:none}
   .brand .brand-short{display:inline}
+  .tb-search{flex:none; width:32px; min-width:32px; height:30px; padding:0; justify-content:center}
+  .tb-search span{font-size:0; flex:none}
+  .tb-search span::before{content:'⌕'; font-size:18px}
   .tb-search kbd{display:none}
   .content{padding:14px 12px 32px}
   .page-head p{font-size:13px}
+  .page-head > .flex{flex-wrap:wrap!important}
+  .page-head > .flex > :first-child{flex-basis:100%!important; min-width:0}
+  .page-head .row-actions{flex-wrap:wrap; max-width:100%; justify-content:flex-start!important}
+  .seg{max-width:100%; overflow-x:auto}
+  .seg-b{flex:none}
 }
 @media(max-width:420px){
   .proj-chip small{display:none}
+  .topbar .brand{display:none}
+  .topbar .right{margin-left:auto}
+  .topbar .tag{max-width:82px; overflow:hidden; text-overflow:ellipsis}
 }
 
 /* ============================================================
@@ -401,7 +421,7 @@ a.sbar-item:hover,button.sbar-item:hover{background:var(--bg-hover); color:var(-
   transition:background .12s, border-color .12s, color .12s}
 .btn:hover{background:var(--bg-hover); border-color:var(--text-faint); text-decoration:none}
 .btn.primary{background:var(--accent-strong); border-color:var(--accent-strong); color:#fff}
-.btn.primary:hover{background:color-mix(in srgb,var(--accent-strong) 86%,#fff); border-color:color-mix(in srgb,var(--accent-strong) 86%,#fff)}
+.btn.primary:hover{background:color-mix(in srgb,var(--accent-strong) 90%,#000); border-color:color-mix(in srgb,var(--accent-strong) 90%,#000)}
 .btn.ghost{background:transparent; color:var(--text-secondary); border-color:var(--border-strong)}
 .btn.ghost:hover{background:var(--bg-hover); color:var(--text-primary)}
 .btn.sm{font-size:12px; min-height:26px; padding:3px 9px}
@@ -456,6 +476,7 @@ tr.sel td:first-child{box-shadow:inset 2px 0 var(--accent)}
 .input::placeholder,.textarea::placeholder{color:var(--text-faint)}
 .input:hover,.select:hover,.textarea:hover{border-color:var(--text-faint)}
 .input:focus,.select:focus,.textarea:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-wash)}
+.input:focus-visible,.select:focus-visible,.textarea:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .input.mono{font-family:var(--font-mono); font-size:12.5px}
 .textarea{resize:vertical; min-height:74px; line-height:1.5}
 .select{cursor:pointer}

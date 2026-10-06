@@ -65,11 +65,12 @@ export default function Layout() {
   const [cloudStatus, setCloudStatus] = useState<SyncStatus | null>(null)
   const [navOpen, setNavOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [toolsOpen, setToolsOpen] = useState(false)
   const [contextOn, setContextOn] = useState(readContext)
   const loc = useLocation()
   const nav = useSwapNavigate()
   // close the mobile drawer whenever the route changes
-  useEffect(() => setNavOpen(false), [loc.pathname])
+  useEffect(() => { setNavOpen(false); setToolsOpen(false) }, [loc.pathname])
   const { preference, theme, setThemePreference } = useTheme()
 
   const stages = useMemo(() => pipeline(state), [state])
@@ -213,10 +214,12 @@ export default function Layout() {
           </div>
           <Tag tone={run.tone === 'idle' ? 'idle' : run.tone}>{run.label}</Tag>
           <span className="tb-sep" />
-          <button className="icon-btn terra-btn" onClick={() => openTerra()} title={terraReady ? 'Terra — the intelligence layer (⇧T)' : 'Terra is off — add an OpenAI key in Knowledge review → Settings'}>
+          <button className="icon-btn tb-tools-toggle" onClick={() => setToolsOpen((v) => !v)} aria-label="More workspace controls" aria-expanded={toolsOpen} aria-controls="workspace-controls">•••</button>
+          <div id="workspace-controls" className={`tb-tools${toolsOpen ? ' open' : ''}`}>
+          <button className="icon-btn terra-btn" onClick={() => { setToolsOpen(false); openTerra() }} title={terraReady ? 'Terra — the intelligence layer (⇧T)' : 'Terra is off — add an OpenAI key in Knowledge review → Settings'}>
             terra<i className={`st-dot ${terraReady ? 'is-ready' : 'is-empty'}`} aria-hidden="true" />
           </button>
-          <button className="icon-btn cloud-trigger" onClick={() => setCloudOpen(true)} title="Cloud: project state and sync" aria-label={`Cloud sync: ${cloudStatus?.message || 'open settings'}`}>cloud{cloudStatus && cloudStatus.phase !== 'paused' && <i className={`cloud-dot ${cloudStatus.phase}`} aria-hidden="true" />}</button>
+          <button className="icon-btn cloud-trigger" onClick={() => { setToolsOpen(false); setCloudOpen(true) }} title="Cloud: project state and sync" aria-label={`Cloud sync: ${cloudStatus?.message || 'open settings'}`}>cloud{cloudStatus && cloudStatus.phase !== 'paused' && <i className={`cloud-dot ${cloudStatus.phase}`} aria-hidden="true" />}</button>
           <button className="icon-btn ctx-btn" onClick={toggleContext} aria-pressed={contextOn} title={contextOn ? 'Hide the context panel' : 'Show the context panel'}>ctx</button>
           <button type="button" className="icon-btn dim-toggle" onClick={toggleDim} aria-label="3D view" aria-pressed={dim === '3d'} title={dim === '3d' ? 'Flatten the interface (⇧D)' : 'Show the interface in 3D (⇧D)'}>
             <span className="dim-cube" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
@@ -234,6 +237,7 @@ export default function Layout() {
             <option value="auto">auto</option>
           </select>
           <button className="icon-btn kbd-btn" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+          </div>
         </div>
         <i className="tb-progress" aria-hidden="true" />
       </header>

@@ -4,8 +4,9 @@ import { studyId } from './ids'
 /**
  * The extraction table as CSV. Column names are the ones the importer
  * (lib/importStudies.ts) reads back, so an exported table re-imports
- * cleanly; the include flag, risk-of-bias domains and notes ride along as
- * extra columns the importer ignores.
+ * cleanly, including inclusion, domain judgements and multiline notes.
+ * A reimport receives fresh study IDs, so the CSV is a table export rather
+ * than a replacement for the full project JSON backup.
  */
 const esc = (v: unknown) => {
   if (v === undefined || v === null) return ''
@@ -20,7 +21,7 @@ export function extractionCsv(review: Review): string {
     'exp_events', 'exp_total', 'ctrl_events', 'ctrl_total',
     'mean1', 'sd1', 'index_n', 'mean2', 'sd2', 'control_n',
     'registration', 'cohort_name', 'centers', 'recruitment_start', 'recruitment_end', 'population',
-    ...domains.map((d) => `rob_${d.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`),
+    ...domains.map((d) => `rob:${d}`),
     'note',
   ]
   const row = (s: Study) => [

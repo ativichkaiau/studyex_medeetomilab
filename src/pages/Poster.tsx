@@ -15,7 +15,7 @@ function download(content: string, name: string, type: string) {
   a.click()
   URL.revokeObjectURL(url)
 }
-const CERT: Record<string, string> = { High: '#12b981', Moderate: '#1746d1', Low: '#f59e0b', 'Very low': '#e2001a' }
+const CERT: Record<string, string> = { High: 'var(--success)', Moderate: 'var(--accent)', Low: 'var(--warning)', 'Very low': 'var(--danger)' }
 
 export default function Poster() {
   const { state } = useStore()
@@ -57,9 +57,9 @@ export default function Poster() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>SYSTEMATIC REVIEW · DISSEMINATION</Kicker>
+            <Kicker>output / poster_slides</Kicker>
             <h1 style={{ marginTop: 12 }}>Poster &amp; slides</h1>
-            <p>Your review as a conference poster or a printable slide deck — pooled estimate, forest plot, PRISMA and GRADE, in the lab livery. Export a self-contained HTML file and print to PDF.</p>
+            <p>Export the review as a conference poster or printable slide deck, with the pooled estimate, forest plot, PRISMA and GRADE. Save the HTML and print it to PDF.</p>
           </div>
           <div className="row-actions" style={{ flex: 'none', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <div className="seg">
@@ -75,7 +75,7 @@ export default function Poster() {
 
       {meta.k === 0 && <div className="err" style={{ background: 'var(--warn)', color: 'var(--warn-ink)', border: '1px solid color-mix(in srgb,var(--amber) 30%,var(--line))', marginBottom: 16 }}>No pooled studies yet — the results panels will be empty. Add studies on the Studies page.</div>}
 
-      <div className="card lg" style={{ overflowX: 'auto', background: '#eef2fb' }}>
+      <div className="card lg" style={{ overflowX: 'auto', background: 'var(--bg-inset)' }}>
         {mode === 'poster' ? (
           <div className="poster" ref={posterRef}>
             <div className="poster-head">

@@ -56,7 +56,7 @@ export default function References() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>SYSTEMATIC REVIEW · REFERENCE LIBRARY</Kicker>
+            <Kicker>output / references</Kicker>
             <h1 style={{ marginTop: 12 }}>Reference library</h1>
             <p>Every citeable work — graph references and included studies, merged by PMID/DOI — with stable citation keys. Export the whole library as BibTeX or RIS, or copy a single citation into the manuscript.</p>
           </div>
@@ -77,10 +77,10 @@ export default function References() {
       ) : (
         <>
           <div className="grid g4" style={{ marginBottom: 16 }}>
-            <StatCard value={refs.length} label="References" sub="unique, de-duplicated" tone="#1746d1" />
-            <StatCard value={refs.filter((r) => r.inStudies).length} label="In meta-analysis" sub="included studies" tone="#0d9488" />
-            <StatCard value={refs.filter((r) => r.inGraph).length} label="On knowledge graph" sub={`${inBoth} in both`} tone="#7c3aed" />
-            <StatCard value={withDoi} label="With DOI" sub={`${refs.filter((r) => r.pmid).length} with PMID`} tone="#ea580c" />
+            <StatCard value={refs.length} label="References" sub="unique, de-duplicated" tone="var(--accent)" />
+            <StatCard value={refs.filter((r) => r.inStudies).length} label="In meta-analysis" sub="included studies" tone="var(--research)" />
+            <StatCard value={refs.filter((r) => r.inGraph).length} label="On knowledge graph" sub={`${inBoth} in both`} tone="var(--violet)" />
+            <StatCard value={withDoi} label="With DOI" sub={`${refs.filter((r) => r.pmid).length} with PMID`} tone="var(--warning)" />
           </div>
 
           <Bookshelf refs={refs} onPick={findRow} />
@@ -108,8 +108,8 @@ export default function References() {
                         </div>
                       </td>
                       <td>
-                        {r.inStudies && <span className="src-badge" style={{ background: '#0d9488' }} title="Included study">MA</span>}
-                        {r.inGraph && <span className="src-badge" style={{ background: '#7c3aed' }} title="On knowledge graph">GRAPH</span>}
+                        {r.inStudies && <span className="src-badge" style={{ background: 'var(--research)' }} title="Included study">MA</span>}
+                        {r.inGraph && <span className="src-badge" style={{ background: 'var(--violet)' }} title="On knowledge graph">GRAPH</span>}
                       </td>
                       <td>
                         <div className="flex" style={{ gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>

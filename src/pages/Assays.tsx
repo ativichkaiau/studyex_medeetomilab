@@ -108,7 +108,7 @@ export default function Assays() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>ASSAY PLANNER · CLAIM ↔ ASSAY MATRIX</Kicker>
+        <Kicker>bench / assays · claim ↔ assay matrix</Kicker>
         <h1>Assays</h1>
         <p>Each assay is bound to the hypotheses it addresses and the cell type it runs in. Generate a benchable SOP, watch current-vs-required n live, and roll cost + timeline into a budget and Gantt.</p>
         <div className="head-actions">
@@ -186,7 +186,7 @@ export default function Assays() {
                 return (
                   <g key={r.id}>
                     <text x={144} y={y + 11} textAnchor="end" fontSize="10.5" fill="var(--ink-2)" fontWeight={600}>{r.method.length > 20 ? r.method.slice(0, 19) + '…' : r.method}</text>
-                    <rect x={150 + wx(r.phaseStart)} y={y} width={Math.max(4, wx(r.weeks))} height={15} rx={4} fill={STATUS_COLOR[r.status]} opacity={0.9} />
+                    <rect x={150 + wx(r.phaseStart)} y={y} width={Math.max(4, wx(r.weeks))} height={12} rx={2} fill={STATUS_COLOR[r.status]} opacity={0.62} />
                     {r.costK ? <text x={150 + wx(r.phaseStart) + Math.max(4, wx(r.weeks)) + 5} y={y + 11} fontSize="9" fill="var(--muted)" fontFamily="var(--mono)">${r.costK}k</text> : null}
                   </g>
                 )

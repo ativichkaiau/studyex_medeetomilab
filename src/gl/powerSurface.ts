@@ -67,9 +67,9 @@ void main() {
   gl_FragColor = vec4(c * a, a);
 }`
 
-const RED = rgb('#e2001a')
-const AMBER = rgb('#f59e0b')
-const GREEN = rgb('#12b981')
+const RED = rgb('#b23b3b')
+const AMBER = rgb('#94650f')
+const GREEN = rgb('#2e7d4f')
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
   return t * t * (3 - 2 * t)

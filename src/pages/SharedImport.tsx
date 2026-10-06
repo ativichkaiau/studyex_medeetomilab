@@ -31,7 +31,7 @@ export default function SharedImport() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>SHARED PROJECT</Kicker>
+        <Kicker>project / shared</Kicker>
         <h1>Import a shared project</h1>
       </div>
       <div className="card lg">

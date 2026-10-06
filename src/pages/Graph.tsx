@@ -72,7 +72,7 @@ export default function Graph() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>RESEARCH KNOWLEDGE GRAPH · GROW IT FROM HERE</Kicker>
+        <Kicker>knowledge / knowledge_graph</Kicker>
         <h1>Knowledge Graph</h1>
         <p>Genes, marks, regions, cell types, assays, phenotypes, drugs, papers and hypotheses on one typed graph. Drag to rearrange, click for detail, add nodes and edges without touching code.</p>
         <div className="head-actions">
@@ -83,7 +83,7 @@ export default function Graph() {
 
       <div className="graph-controls">
         <div className="gc-search">
-          <input className="input" placeholder="Search nodes…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input className="input" aria-label="Search graph nodes" placeholder="Search nodes…" value={q} onChange={(e) => setQ(e.target.value)} />
           {q && <span className="small mono">{matchN} match{matchN === 1 ? '' : 'es'}</span>}
         </div>
         {usedTypes.length > 0 && (

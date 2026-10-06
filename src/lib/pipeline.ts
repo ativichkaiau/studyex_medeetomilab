@@ -3,6 +3,7 @@ import { taStatus, advanced } from './screening'
 import { analysisIncluded } from './cohorts'
 import { usable, dataIntegrity, measureInfo } from './metaAnalysis'
 import { prismaAudit } from './prismaAudit'
+import { isRegistered } from './projectFacts'
 
 /**
  * The research pipeline: search → screen → extract → assess bias → analyse →
@@ -42,7 +43,7 @@ export function pipeline(s: ProjectState): Stage[] {
 
   // ---- protocol · DEFINE ----
   const pico = [r.pico.p, r.pico.i, r.pico.c, r.pico.o].filter((x) => x.trim()).length
-  const registered = !!r.registration?.trim() || s.project.preRegistered
+  const registered = isRegistered(s)
   const protoChecks = [!!r.question.trim(), pico === 4, r.inclusion.length > 0, r.databases.length > 0, r.searches.length > 0, registered]
   const protoDone = protoChecks.filter(Boolean).length
   const protocol: Stage = {
@@ -148,7 +149,8 @@ export function projectState(stages: Stage[], instabilities: Instability[]): { l
   const highs = instabilities.filter((i) => i.status === 'open' && i.severity === 'high').length
   if (stages.every((st) => st.state === 'empty')) return { label: 'IDLE', tone: 'idle' }
   if (stages.some((st) => st.state === 'mismatch') || highs > 0) return { label: 'ATTENTION', tone: 'warn' }
-  return { label: 'READY', tone: 'ok' }
+  if (stages.every((st) => st.state === 'ready' || st.state === 'done')) return { label: 'READY', tone: 'ok' }
+  return { label: 'IN PROGRESS', tone: 'idle' }
 }
 
 /** the stage a route belongs to, if any */

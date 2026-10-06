@@ -1,12 +1,10 @@
 import type { MetaResult } from '../lib/metaAnalysis'
 import { fmt } from '../lib/metaAnalysis'
-import type { Review, Study, RobLevel } from '../types'
-import { analysisIncluded } from '../lib/cohorts'
+import type { Review } from '../types'
 
 const sans = { fontFamily: 'var(--sans)' } as const
 const mono = { fontFamily: 'var(--mono)' } as const
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
-const ROB_COLOR: Record<RobLevel, string> = { low: '#12b981', some: '#f59e0b', high: '#e2001a' }
 
 function niceTicks(lo: number, hi: number, n = 5): number[] {
   const span = hi - lo || 1
@@ -141,63 +139,6 @@ export function FunnelPlot({ result, imputed = [], adjustedPool }: { result: Met
         {imputed.length > 0 && <><circle cx={238} cy={-4} r={4} fill="none" stroke="var(--red)" strokeWidth={1.6} /><text x={246} y={-1} fontSize="8" fill="var(--muted)">imputed</text></>}
       </g>
     </svg>
-  )
-}
-
-// ---------------- Risk-of-bias summary (traffic light + bar) ----------------
-export function RobPlot({ studies, domains }: { studies: Study[]; domains: string[] }) {
-  const incl = studies.filter(analysisIncluded)
-  const overall = (s: Study): RobLevel => {
-    const vals = domains.map((d) => s.rob?.[d])
-    return vals.includes('high') ? 'high' : vals.includes('some') ? 'some' : 'low'
-  }
-  const cols = [...domains, 'Overall']
-  const dot = (lvl: RobLevel | undefined) => (
-    <span style={{ display: 'inline-block', width: 15, height: 15, borderRadius: '50%', background: ROB_COLOR[lvl ?? 'some'] }} />
-  )
-  const levels: RobLevel[] = ['low', 'some', 'high']
-  const barFor = (col: string) => {
-    const vals = incl.map((s) => (col === 'Overall' ? overall(s) : s.rob?.[col] ?? 'some'))
-    const n = vals.length || 1
-    return levels.map((l) => ({ l, pct: (vals.filter((v) => v === l).length / n) * 100 }))
-  }
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, alignItems: 'start' }} className="rob-figure">
-      <div style={{ overflowX: 'auto' }}>
-        <div className="small mono" style={{ marginBottom: 8, color: 'var(--muted)' }}>TRAFFIC-LIGHT</div>
-        <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', padding: '4px 8px', fontSize: 10, color: 'var(--muted)' }}>Study</th>
-              {cols.map((c) => <th key={c} style={{ padding: '4px 6px', fontSize: 10, color: 'var(--muted)', writingMode: c.length > 6 ? 'vertical-rl' : undefined, transform: c.length > 6 ? 'rotate(180deg)' : undefined }}>{c}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {incl.map((s) => (
-              <tr key={s.id}>
-                <td style={{ padding: '3px 8px', whiteSpace: 'nowrap' }}>{s.author} {s.year}</td>
-                {domains.map((d) => <td key={d} style={{ textAlign: 'center', padding: '3px 6px' }}>{dot(s.rob?.[d])}</td>)}
-                <td style={{ textAlign: 'center', padding: '3px 6px' }}>{dot(overall(s))}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <div className="small mono" style={{ marginBottom: 8, color: 'var(--muted)' }}>ACROSS STUDIES</div>
-        {cols.map((c) => (
-          <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
-            <span style={{ width: 96, fontSize: 12, fontWeight: 600, flex: 'none' }}>{c}</span>
-            <span style={{ flex: 1, display: 'flex', height: 15, borderRadius: 5, overflow: 'hidden', border: '1px solid var(--line)' }}>
-              {barFor(c).map((b) => <span key={b.l} style={{ width: `${b.pct}%`, background: ROB_COLOR[b.l] }} />)}
-            </span>
-          </div>
-        ))}
-        <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-          {levels.map((l) => <span key={l} className="small" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{dot(l)} {l}</span>)}
-        </div>
-      </div>
-    </div>
   )
 }
 

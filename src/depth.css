@@ -15,18 +15,18 @@
    under the pointer (lib/tilt.ts) and in motion.
    ============================================================ */
 
-html{--vt-stage:#dfe4ee}
-html[data-theme="night"]{--vt-stage:#020308}
+html{--vt-stage:#eef0f2}
+html[data-theme="night"]{--vt-stage:#08090a}
 
 html[data-dim="3d"]{
-  --edge:#d5dbe6; --edge-2:#c5cedc;
-  --drop:rgba(20,34,68,.13); --drop-2:rgba(20,34,68,.24);
+  --edge:#d5d9df; --edge-2:#c5cad1;
+  --drop:rgba(18,20,23,.13); --drop-2:rgba(18,20,23,.24);
   --glint:rgba(255,255,255,.95);
-  --shine:rgba(47,107,255,.07); --shade:rgba(10,31,107,.05);
-  --key-navy:#04113f;
-  --floor-line:rgba(10,31,107,.10); --horizon:rgba(47,107,255,.10); --horizon-line:rgba(47,107,255,.22);
+  --shine:rgba(59,95,240,.07); --shade:rgba(18,20,23,.05);
+  --key-navy:#242b3a;
+  --floor-line:rgba(59,95,240,.10); --horizon:rgba(59,95,240,.10); --horizon-line:rgba(59,95,240,.22);
   --lift-face:#ffffff;
-  --track-b:rgba(10,31,107,.16); --track-r:rgba(226,0,26,.14); --track-y:rgba(255,204,0,.22);
+  --track-b:rgba(59,95,240,.20); --track-r:rgba(35,118,111,.15); --track-y:rgba(95,102,112,.13);
 
   /* entrances come up out of the floor instead of sliding up the page */
   --lv-section-from:perspective(1400px) translate3d(0,64px,-240px) rotateX(20deg);
@@ -34,14 +34,14 @@ html[data-dim="3d"]{
   --cmdk-from:perspective(1400px) translate3d(0,-44px,-180px) rotateX(-24deg);
 }
 html[data-dim="3d"][data-theme="night"]{
-  --edge:#0a0d13; --edge-2:#050609;
+  --edge:#252a31; --edge-2:#181c21;
   --drop:rgba(0,0,0,.45); --drop-2:rgba(0,0,0,.68);
   --glint:rgba(255,255,255,.06);
-  --shine:rgba(140,175,255,.16); --shade:rgba(0,0,0,.28);
-  --key-navy:#010516;
-  --floor-line:rgba(96,138,255,.16); --horizon:rgba(47,107,255,.17); --horizon-line:rgba(120,160,255,.45);
-  --lift-face:#20252f;
-  --track-b:rgba(47,107,255,.30); --track-r:rgba(255,40,70,.26); --track-y:rgba(255,204,0,.26);
+  --shine:rgba(142,166,255,.16); --shade:rgba(0,0,0,.28);
+  --key-navy:#14171a;
+  --floor-line:rgba(82,120,255,.16); --horizon:rgba(82,120,255,.17); --horizon-line:rgba(142,166,255,.45);
+  --lift-face:#20252b;
+  --track-b:rgba(82,120,255,.28); --track-r:rgba(87,183,176,.20); --track-y:rgba(122,127,135,.14);
 }
 
 /* ---------- the floor ---------- */
@@ -162,10 +162,10 @@ html[data-dim="3d"] .sb-link.active{box-shadow:inset 0 2px 5px color-mix(in srgb
 /* ---------- the page head ---------- */
 /* the livery stripes are extruded bars */
 html[data-dim="3d"] .rule i{box-shadow:0 2px 0 var(--stripe-edge,rgba(0,0,0,.28))}
-html[data-dim="3d"] .rule .b{--stripe-edge:#040f3d}
-html[data-dim="3d"] .rule .r{--stripe-edge:#970012}
-html[data-dim="3d"] .rule .y{--stripe-edge:#b88f00}
-html[data-dim="3d"][data-theme="night"] .rule .b{--stripe-edge:#15378f}
+html[data-dim="3d"] .rule .b{--stripe-edge:#263da5}
+html[data-dim="3d"] .rule .r{--stripe-edge:#1c625d}
+html[data-dim="3d"] .rule .y{--stripe-edge:#4b515a}
+html[data-dim="3d"][data-theme="night"] .rule .b{--stripe-edge:#3858d1}
 /* A page arrives whole in 3D: as a face of the drum (lib/swap.ts), or with
    its sections rising out of the floor on first load. The flat design's
    piece-by-piece entrances would only jostle inside that rigid face, so here
@@ -241,9 +241,9 @@ html[data-theme="night"] .depth-spot{background:radial-gradient(closest-side, rg
    A dark screen in either theme, like the real thing: ECG grid behind a
    WebGL waterfall of traces, readouts in the bezel. */
 .ecg-monitor{position:relative; height:200px; margin:0 0 16px; border-radius:var(--radius); overflow:hidden; isolation:isolate;
-  background:radial-gradient(120% 110% at 50% 100%, #0c1d55 0%, #040a1c 68%);
-  border:1px solid #13235e;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 60px rgba(47,107,255,.14), 0 1px 0 #030818, 0 2px 0 #030818, 0 3px 0 #030818, 0 4px 0 #020612, 0 26px 44px -26px rgba(4,10,28,.7)}
+  background:radial-gradient(120% 110% at 50% 100%, #1c243a 0%, #0a0c10 68%);
+  border:1px solid #303d62;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 60px rgba(82,120,255,.12), 0 1px 0 #080a0d, 0 2px 0 #080a0d, 0 3px 0 #080a0d, 0 4px 0 #06080b, 0 26px 44px -26px rgba(8,10,13,.7)}
 .ecg-monitor::before{content:""; position:absolute; inset:0; z-index:-1;
   background-image:linear-gradient(rgba(96,138,255,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(96,138,255,.13) 1px, transparent 1px),
     linear-gradient(rgba(96,138,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(96,138,255,.05) 1px, transparent 1px);
@@ -255,14 +255,14 @@ html[data-theme="night"] .depth-spot{background:radial-gradient(closest-side, rg
   background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 34%), repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px)}
 .ecg-monitor canvas{position:absolute; inset:0; width:100%; height:100%}
 /* under the pointer it leans like any slab, but keeps its dark glass and edges */
-html[data-dim="3d"] .ecg-monitor.tilting{border-color:#22367f;
+html[data-dim="3d"] .ecg-monitor.tilting{border-color:#3b5ff0;
   background-image:radial-gradient(130% 130% at var(--mx,50%) var(--my,50%), rgba(140,175,255,.16), transparent 45%),
-    radial-gradient(120% 110% at 50% 100%, #0c1d55 0%, #040a1c 68%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 60px rgba(47,107,255,.16), 0 1px 0 #030818, 0 2px 0 #030818, 0 3px 0 #030818, 0 4px 0 #020612, 0 34px 54px -24px rgba(4,10,28,.75)}
+    radial-gradient(120% 110% at 50% 100%, #1c243a 0%, #0a0c10 68%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 60px rgba(82,120,255,.16), 0 1px 0 #080a0d, 0 2px 0 #080a0d, 0 3px 0 #080a0d, 0 4px 0 #06080b, 0 34px 54px -24px rgba(8,10,13,.75)}
 .ecg-hud{position:absolute; top:12px; left:16px; right:16px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font:600 10px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:rgba(200,214,255,.74); pointer-events:none}
-.ecg-hud b{color:#ffcc00; font-weight:800}
-.ecg-hud i{font-style:normal; color:#ff5a6e}
+.ecg-hud b{color:#8ea6ff; font-weight:800}
+.ecg-hud i{font-style:normal; color:#57b7b0}
 .ecg-note{position:absolute; left:16px; bottom:10px; font:500 9.5px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:rgba(200,214,255,.46); pointer-events:none}
 @media(max-width:620px){.ecg-monitor{height:160px}.ecg-hud span:last-child{display:none}}
 

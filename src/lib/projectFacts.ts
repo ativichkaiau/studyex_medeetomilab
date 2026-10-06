@@ -9,6 +9,12 @@ export function reviewType(s: ProjectState): string {
   return kinds.join(' / ') + (bench ? ' + mechanistic' : '')
 }
 
+/** A planned registration is not a completed registration. */
+export function isRegistered(s: ProjectState): boolean {
+  const registration = s.review.registration?.trim() ?? ''
+  return !!registration && !/\b(to register|pending|not registered)\b/i.test(registration)
+}
+
 /** milliseconds → "3m ago", for logs */
 export function ago(ts: number, now = Date.now()): string {
   const s = Math.max(0, Math.round((now - ts) / 1000))

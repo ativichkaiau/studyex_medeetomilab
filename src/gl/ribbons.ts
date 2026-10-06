@@ -67,11 +67,11 @@ void main() {
 
 interface Ribbon { y: number; amp: number; z: number; width: number; twist: number; phase: number; day: string; night: string; dayA: number; nightA: number }
 
-// navy, Canon red, Camel yellow — furthest first, so they layer back to front
+// graphite, research teal, and blue — furthest first
 const RIBBONS: Ribbon[] = [
-  { y: 0.95, amp: 0.2, z: -5.9, width: 0.07, twist: 6, phase: 4.2, day: '#e0a800', night: '#ffcc00', dayA: 0.5, nightA: 0.42 },
-  { y: 0.74, amp: 0.16, z: -5.3, width: 0.085, twist: 7, phase: 0, day: '#0a1f6b', night: '#2f6bff', dayA: 0.36, nightA: 0.55 },
-  { y: 0.56, amp: 0.12, z: -4.7, width: 0.05, twist: 9, phase: 2.1, day: '#e2001a', night: '#ff2846', dayA: 0.24, nightA: 0.5 },
+  { y: 0.95, amp: 0.2, z: -5.9, width: 0.07, twist: 6, phase: 4.2, day: '#9aa0a8', night: '#7a7f87', dayA: 0.28, nightA: 0.22 },
+  { y: 0.74, amp: 0.16, z: -5.3, width: 0.085, twist: 7, phase: 0, day: '#3b5ff0', night: '#5278ff', dayA: 0.36, nightA: 0.45 },
+  { y: 0.56, amp: 0.12, z: -4.7, width: 0.05, twist: 9, phase: 2.1, day: '#23766f', night: '#57b7b0', dayA: 0.22, nightA: 0.32 },
 ]
 const SEGMENTS = 180
 const FOV = (38 * Math.PI) / 180

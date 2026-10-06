@@ -7,7 +7,7 @@ import {
 } from '../lib/supabase'
 import { watchWorkspaceSync, type Resolution, type SyncStatus } from '../lib/cloudSync'
 import { download } from '../lib/reviewSessions'
-import { Portal } from './Portal'
+import { Modal } from './Modal'
 import { Sk } from './Skeleton'
 
 const AUTOSYNC_LS = 'williamslab.cloud.autosync'
@@ -22,7 +22,7 @@ export default function Cloud({ open, onClose, onSyncStatus }: { open: boolean; 
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [shareLink, setShareLink] = useState<string | null>(null)
-  const [autoSync, setAutoSync] = useState(() => localStorage.getItem(AUTOSYNC_LS) !== 'off')
+  const [autoSync, setAutoSync] = useState(() => { try { return localStorage.getItem(AUTOSYNC_LS) !== 'off' } catch { return true } })
   const syncRef = useRef<Awaited<ReturnType<typeof createWorkspaceSync>> | null>(null)
   const [syncVersion, setSyncVersion] = useState(0)
 
@@ -118,7 +118,7 @@ export default function Cloud({ open, onClose, onSyncStatus }: { open: boolean; 
   }
   function downloadBackup() {
     const backup = syncRef.current?.latestBackup()
-    if (backup) download(`williamslab-device-backup-${Date.now()}.json`, 'application/json', backup)
+    if (backup) download(`medeetomilab-device-backup-${Date.now()}.json`, 'application/json', backup)
   }
   async function doShare() {
     setBusy('share'); setMsg(null); setShareLink(null)
@@ -134,19 +134,17 @@ export default function Cloud({ open, onClose, onSyncStatus }: { open: boolean; 
     catch (e) { setMsg({ ok: false, text: e instanceof Error ? e.message : 'Sign-out failed.' }); setSyncVersion((v) => v + 1) }
   }
   function toggleAuto() {
-    setAutoSync((v) => { const n = !v; localStorage.setItem(AUTOSYNC_LS, n ? 'on' : 'off'); return n })
+    setAutoSync((v) => { const n = !v; try { localStorage.setItem(AUTOSYNC_LS, n ? 'on' : 'off') } catch { /* session choice still applies */ } return n })
   }
 
   if (!open) return null
   return (
-    <Portal>
-      <div className="kbd-overlay" onClick={onClose}>
-        <div className="kbd-card" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
-          <div className="kbd-head">
-            <b>☁ Cloud sync &amp; sharing</b>
-            <button className="ai-x" onClick={onClose} aria-label="Close">✕</button>
-          </div>
-          <div style={{ padding: '4px 2px' }}>
+    <Modal title="Cloud sync & sharing" onClose={onClose}>
+      <div className="cloud-content">
+        <div className="cloud-overview">
+          <div><span className="mono">~/project/{state.project.code}/cloud</span><strong>Workspace connection</strong><small>{email || 'Saved on this device'}</small></div>
+          <span className={`cloud-phase phase-${configured ? syncStatus.phase : 'unconfigured'}`}>{configured ? syncStatus.phase : 'unconfigured'}</span>
+        </div>
             {!configured ? (
               <>
                 <p className="small" style={{ marginBottom: 12 }}>Bring your own free <b>Supabase</b> project — your data stays in your account. Run <span className="mono">db/supabase-schema.sql</span> once in the Supabase SQL editor, then paste the project URL and the <b>anon</b> public key (it’s RLS-protected — safe on the client; never the service_role secret).</p>
@@ -226,10 +224,8 @@ export default function Cloud({ open, onClose, onSyncStatus }: { open: boolean; 
                 </div>
               </>
             )}
-            {msg && <p className="small" style={{ marginTop: 10, color: msg.ok ? 'var(--green)' : 'var(--red)' }}>{msg.text}</p>}
-          </div>
-        </div>
+            {msg && <p className={`cloud-message ${msg.ok ? 'ok' : 'bad'}`} role="status">{msg.text}</p>}
       </div>
-    </Portal>
+    </Modal>
   )
 }

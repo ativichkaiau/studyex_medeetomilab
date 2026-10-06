@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Kicker, MetaGrid, Tag, Empty, type Tone } from '../components/ui'
 import { ForestPlot, FunnelPlot, PrismaFlow } from '../components/srmaPlots'
@@ -69,7 +69,7 @@ export default function Artifacts() {
       state: r.robDomains.length && assessed ? 'ready' : r.robDomains.length ? 'empty' : 'blocked', note: !r.robDomains.length ? 'no appraisal domains defined' : assessed ? `${r.robTool || 'custom tool'} · ${incl.length} studies` : 'no judgements yet',
       figure: r.robDomains.length && assessed ? <RobFigure studies={r.studies} domains={r.robDomains} tool={r.robTool} /> : undefined },
     { id: 'ARTIFACT_05', type: 'extraction_table', source: { label: 'extraction', to: '/studies' }, formats: ['CSV'],
-      state: r.studies.length ? 'ready' : 'empty', note: r.studies.length ? `${r.studies.length} studies · re-imports as-is` : '0 studies',
+      state: r.studies.length ? 'ready' : 'empty', note: r.studies.length ? `${r.studies.length} studies · values re-import; study IDs are regenerated` : '0 studies',
       files: [{ label: 'export CSV', run: () => downloadText(extractionCsv(r), `${code}-extraction.csv`, 'text/csv') }] },
     { id: 'ARTIFACT_06', type: 'search_strategy', source: { label: 'protocol', to: '/protocol' }, formats: ['TXT'],
       state: r.searches.length ? 'ready' : 'empty', note: r.searches.length ? `${r.searches.length} database string${r.searches.length === 1 ? '' : 's'}` : 'no search strings recorded',
@@ -89,7 +89,9 @@ export default function Artifacts() {
   ]
 
   const [params] = useSearchParams()
+  const location = useLocation()
   const [selId, setSelId] = useState(() => params.get('a') ?? artifacts[0].id)
+  useEffect(() => { const id = params.get('a'); if (id) setSelId(id) }, [location.key])
   const sel = artifacts.find((a) => a.id === selId) ?? artifacts[0]
   const figRef = useRef<HTMLDivElement>(null)
   const svg = () => figRef.current?.querySelector('svg') as SVGSVGElement | null

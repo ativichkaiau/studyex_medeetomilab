@@ -117,9 +117,9 @@ export default function Hypotheses() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>HYPOTHESIS GRAPH · FALSIFIABLE CLAIMS</Kicker>
+        <Kicker>knowledge / hypotheses · falsifiable claims</Kicker>
         <h1>Hypotheses</h1>
-        <p>Every claim carries a predicted direction, an effect size, and the observation that would kill it. Cite the review's studies and pooled estimate as evidence, tally support vs refutation, and pressure-test each with AI.</p>
+        <p>Every claim carries a predicted direction, an effect size, and the observation that would kill it. Cite the review's studies and pooled estimate as evidence, tally support vs refutation, and pressure-test each with Terra.</p>
         <div className="head-actions">
           <button className="btn primary sm" onClick={() => setEditing({ id: null, draft: { ...blank } })}>＋ New hypothesis</button>
         </div>
@@ -141,7 +141,7 @@ export default function Hypotheses() {
                 <span className="spacer" />
                 <HypBadge status={h.status} />
                 <div className="row-actions" style={{ marginLeft: 10 }}>
-                  <button className="icon-btn" onClick={() => critique(h)} disabled={c?.streaming} title="AI pressure-test">✦ Critique</button>
+                  <button className="icon-btn" onClick={() => critique(h)} disabled={c?.streaming} title="AI pressure-test">terra · critique</button>
                   <button className="icon-btn" onClick={() => setEditing({ id: h.id, draft: toDraft(h) })}>Edit</button>
                   <button className="icon-btn danger" onClick={() => { if (confirm(`Delete ${h.label}?`)) removeHypothesis(h.id) }}>Delete</button>
                 </div>
@@ -202,7 +202,7 @@ export default function Hypotheses() {
 
               {(c?.text || c?.streaming || c?.error) && (
                 <div className="hyp-critique">
-                  <div className="hc-head"><span className="mono small">✦ AI CRITIQUE</span>{!c.streaming && <button className="he-x" onClick={() => setCrit((cc) => ({ ...cc, [h.id]: { text: '', streaming: false } }))}>✕</button>}</div>
+                  <div className="hc-head"><span className="mono small">terra · critique</span>{!c.streaming && <button className="he-x" onClick={() => setCrit((cc) => ({ ...cc, [h.id]: { text: '', streaming: false } }))}>✕</button>}</div>
                   {c.error && <div className="err">{c.error}</div>}
                   {c.text ? <Markdown text={c.text} /> : c.streaming && <Sk kind="critique" />}
                 </div>

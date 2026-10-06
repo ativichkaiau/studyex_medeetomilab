@@ -148,7 +148,7 @@ function ProjectReview() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>KNOWLEDGE REVIEW · {state.project.code}</Kicker>
+            <Kicker>knowledge / knowledge_review</Kicker>
             <h1 style={{ marginTop: 12 }}>Knowledge Review</h1>
             <p>Explore {state.project.name}. Answers use this project's Theory when available, cite the sections they draw from, and stream live.</p>
           </div>
@@ -229,6 +229,7 @@ function ProjectReview() {
                 send(input)
               }
             }}
+            aria-label="Ask a question about project theory"
             placeholder="Ask about this project's theory, or pick a topic above… (Enter to send)"
           />
           {streaming ? (

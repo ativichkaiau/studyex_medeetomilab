@@ -94,7 +94,7 @@ export default function Power() {
       const m = multMin + (j / (ny - 1)) * (multMax - multMin)
       for (let i = 0; i < nx; i++) grid[j * nx + i] = powerAtN(nAt(i), m)
     }
-    const SLICE: Record<string, string> = { '+25%': '#12b981', planned: '#2f6bff', '−25%': '#e2001a' }
+    const SLICE: Record<string, string> = { '+25%': 'var(--success)', planned: 'var(--accent)', '−25%': 'var(--danger)' }
     return {
       nx, ny, power: grid, nMin, nMax: maxN, multMin, multMax, target,
       slices: mults.map((m) => ({ mult: m.mult, color: SLICE[m.label], power: Float32Array.from({ length: nx }, (_, i) => powerAtN(nAt(i), m.mult)) })),
@@ -114,7 +114,7 @@ export default function Power() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>STATISTICAL POWER · SAMPLE SIZE</Kicker>
+        <Kicker>bench / power</Kicker>
         <h1>Power &amp; sample size</h1>
         <p>Plan the confirmatory study: two-sample, paired, k-arm ANOVA, or survival (log-rank). Genome-wide readouts pay a multiple-testing tax — Bonferroni for FWER or Benjamini–Hochberg for FDR. Pull the plausible effect straight from your meta-analysis.</p>
       </div>

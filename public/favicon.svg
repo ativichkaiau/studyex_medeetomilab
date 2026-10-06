@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0a1f6b"/>
-  <rect x="52" width="6" height="32" fill="#e2001a"/>
-  <rect x="52" y="32" width="6" height="32" fill="#ffcc00"/>
-  <text x="30" y="46" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="900" fill="#fff" text-anchor="middle">W</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="medeetomilab">
+  <rect width="64" height="64" rx="12" fill="#08090a"/>
+  <path d="M15.25 41.25v-17.5H20v2.63c1.63-2.13 3.88-3.25 6.63-3.25 3.13 0 5.5 1.38 6.88 3.88 1.75-2.5 4.25-3.88 7.63-3.88 5.25 0 8.38 3.63 8.38 9.5v8.63h-4.88v-8.38c0-3.38-1.5-5.13-4.25-5.13-3 0-4.88 2-4.88 5.38v8.13h-4.88v-8.38c0-3.38-1.5-5.13-4.25-5.13-2.88 0-4.88 2-4.88 5.38v8.13z" fill="#f1f2ef"/>
+  <rect x="42.5" y="44.75" width="7" height="1.5" rx=".25" fill="#5278ff"/>
 </svg>
