@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { Kicker, Rule } from '../components/ui'
+import { Kicker } from '../components/ui'
+import EvidenceRegistry from '../components/EvidenceRegistry'
 import { Sk } from '../components/Skeleton'
 import RadarScope, { type ScopeContact } from '../components/RadarScope'
 import { searchPubmed, type PubmedHit } from '../lib/pubmed'
@@ -51,7 +52,7 @@ const TRIAGE_RESPONSE_FORMAT: JsonSchemaResponseFormat = {
   },
 }
 
-const SRC_COLOR: Record<SourceName, string> = { PubMed: '#1746d1', 'Europe PMC': '#0d9488', CrossRef: '#ea580c', 'ClinicalTrials.gov': '#7c3aed' }
+const SRC_COLOR: Record<SourceName, string> = { PubMed: '#3b5ff0', 'Europe PMC': '#23766f', CrossRef: '#94650f', 'ClinicalTrials.gov': '#5f54b8' }
 const SRC_ABBR: Record<SourceName, string> = { PubMed: 'PM', 'Europe PMC': 'EPMC', CrossRef: 'CR', 'ClinicalTrials.gov': 'CT' }
 
 function firstAuthorSurname(authors?: string): string {
@@ -268,7 +269,7 @@ export default function Radar() {
 
   async function runTriage() {
     if (!hasKey()) {
-      setError('Add an OpenAI key in Knowledge Review → Settings to use AI triage.')
+      setError('Terra is off — add an OpenAI key in Knowledge review → Settings to triage.')
       return
     }
     if (!hits.length) return
@@ -291,7 +292,7 @@ export default function Radar() {
       setTriage(parseTriageResponse(text, new Set(hits.map((h) => h.pmid))))
     } catch (e) {
       const message = e instanceof Error ? e.message : ''
-      setError(message ? `AI triage failed: ${message}` : 'AI triage failed — the model may have returned an unexpected format. Try again.')
+      setError(message ? `AI triage failed: ${message}` : 'Terra triage failed — the model returned an unexpected format. Try again.')
     } finally {
       setTriaging(false)
     }
@@ -335,11 +336,13 @@ export default function Radar() {
   return (
     <>
       <div className="page-head">
-        <Rule />
-        <Kicker>LITERATURE · LIVE PUBMED</Kicker>
-        <h1>Literature Radar</h1>
-        <p>Search PubMed live, triage hits for the review with AI, link them to a hypothesis, and send them straight into the SRMA extraction table. Saved searches flag what's new since you last looked.</p>
+        <Kicker>pipeline / 02 literature · ingest</Kicker>
+        <h1>Literature</h1>
+        <p>The project's evidence registry, and the searches that feed it: PubMed live, Europe PMC, Crossref and trial registries, triage, and a living review that flags what's new since the last run.</p>
       </div>
+
+      <EvidenceRegistry />
+      <div className="sec-label">ingest · search &amp; triage</div>
 
       <RadarScope contacts={contacts} sources={ALL_SOURCES} onPick={findContact} />
 
@@ -418,7 +421,7 @@ export default function Radar() {
         {!loading && hits.length > 0 && (
           <>
             <div className="flex" style={{ gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-              <button className="btn ghost sm" onClick={runTriage} disabled={triaging}>{triaging ? 'Triaging…' : '✦ AI relevance triage'}</button>
+              <button className="btn ghost sm" onClick={runTriage} disabled={triaging}>{triaging ? 'Triaging…' : 'terra · relevance triage'}</button>
               {triagedIncludes.length > 0 && <button className="btn primary sm" onClick={sendAllIncludes}>→ Send {triagedIncludes.length} "include" to Studies</button>}
               {triaging && <span className="sr-only" role="status">Triaging relevance…</span>}
               {fresh.size > 0 && <span className="pill" style={{ borderColor: 'var(--green)', color: 'var(--green)' }}>{fresh.size} new since last run</span>}
@@ -459,8 +462,8 @@ export default function Radar() {
         )}
       </div>
 
-      <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--violet, #7c3aed)' } as CSSProperties}>
-        <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #7c3aed)' }} />MULTI-SOURCE SEARCH · EUROPE PMC · CROSSREF · TRIALS</div>
+      <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--violet, #5f54b8)' } as CSSProperties}>
+        <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #5f54b8)' }} />MULTI-SOURCE SEARCH · EUROPE PMC · CROSSREF · TRIALS</div>
         <p className="small" style={{ marginTop: -4, marginBottom: 12 }}>Search several databases at once and fuzzy-de-duplicate the union (by DOI, PMID, then near-identical title). Everything runs in your browser — no proxy, no key.</p>
         <div className="flex" style={{ gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           {ALL_SOURCES.map((s) => (
@@ -487,7 +490,7 @@ export default function Radar() {
         {msMeta && msHits.length > 0 && (
           <>
             <div className="flex" style={{ gap: 8, marginTop: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-              <span className="pill" style={{ borderColor: 'var(--violet, #7c3aed)', color: 'var(--violet, #7c3aed)' }}>{msHits.length} unique</span>
+              <span className="pill" style={{ borderColor: 'var(--violet, #5f54b8)', color: 'var(--violet, #5f54b8)' }}>{msHits.length} unique</span>
               {msMeta.rawCount > msHits.length && <span className="small muted">{msMeta.rawCount - msHits.length} duplicate{msMeta.rawCount - msHits.length === 1 ? '' : 's'} merged</span>}
               <span className="small mono muted" style={{ marginLeft: 'auto' }}>{ALL_SOURCES.filter((s) => msMeta.perSource[s] != null).map((s) => `${s} ${msMeta.perSource[s]}`).join(' · ')}</span>
             </div>

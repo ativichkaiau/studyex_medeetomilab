@@ -2,6 +2,7 @@ import type { ProjectState, Instability, Severity } from '../types'
 import { assayPowerReport, fmtAlpha } from './power'
 import { computeMeta } from './metaAnalysis'
 import { analysisIncluded } from './cohorts'
+import { isRegistered } from './projectFacts'
 
 // ============================================================
 // Rigor Monitor — the study-design check engine.
@@ -203,7 +204,7 @@ export function computeInstabilities(s: ProjectState): Instability[] {
     const srma = (key: string, severity: Severity, signal: string, comment: string, repair: string) =>
       out.push({ id: `inst_srma_${key}`, type: 'srma_gap', severity, target: s.project.id, targetLabel: 'systematic review', signal, comment, repair, status: 'open' })
 
-    if (!rv.registration || !rv.registration.trim())
+    if (!isRegistered(s))
       srma('reg', 'high', 'Protocol not registered.', `This review reports no prospective registration. An unregistered protocol allows post-hoc changes to the question, eligibility or outcomes — a flaw AMSTAR-2 treats as critical because it enables selective reporting. Register before extraction so the plan is fixed and citable.`, 'Register the protocol on PROSPERO and cite the registration ID.')
 
     if (dbs.size < 2)

@@ -3,6 +3,8 @@ import type { ScreenRecord, ScreenDecision, Review } from '../types'
 // Title/abstract outcome for one record, supporting solo or dual screening.
 export type TaStatus = 'pending' | 'excluded' | 'advance' | 'conflict'
 export function taStatus(rec: ScreenRecord): TaStatus {
+  // an adjudicated conflict follows the adjudication
+  if (rec.adjudicated) return rec.adjudicated === 'exclude' ? 'excluded' : 'advance'
   const ds = [rec.d1, rec.d2].filter(Boolean) as ScreenDecision[]
   if (ds.length === 0) return 'pending'
   if (rec.d1 && rec.d2 && rec.d1 !== rec.d2) {

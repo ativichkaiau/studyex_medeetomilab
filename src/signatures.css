@@ -19,14 +19,14 @@
 .ps-tick.x{translate:-50% 3px}
 .ps-tick.y{translate:6px -50%}
 .ps-tick.z{translate:calc(-100% - 4px) -50%}
-.ps-tick.planned{color:#2f6bff}
+.ps-tick.planned{color:#3b5ff0}
 .ps-tick.target{color:var(--amber)}
 .ps-title{translate:-50% 2px; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2)}
 .ps-title.z{translate:calc(-100% - 4px) -50%}
 .ps-title.y{translate:6px -50%}
 .ps-point{translate:-50% calc(-100% - 12px); padding:3px 8px; border-radius:6px; font-size:10.5px; color:var(--ink);
   background:var(--card); border:1px solid var(--line); box-shadow:0 8px 16px -10px rgba(4,10,28,.45)}
-html[data-theme="night"] .ps-tick.planned{color:#7aa2ff}
+html[data-theme="night"] .ps-tick.planned{color:#8ea6ff}
 
 /* ---------- Knowledge graph & mechanism: Flat ⇄ Layers ---------- */
 .graph-stage{position:relative}
@@ -141,12 +141,12 @@ html[data-card-swap]::view-transition-group(card-swap){animation-duration:.4s}
   transition:translate .35s cubic-bezier(.2,.8,.2,1)}
 /* the page block on top, and the back cover's edge down the right side */
 .book::before{content:""; position:absolute; left:0; bottom:100%; width:100%; height:var(--d); transform-origin:0 100%; transform:skewX(-45deg);
-  background:repeating-linear-gradient(90deg, #f6f1e4 0 2px, #e3dccb 2px 3px); box-shadow:inset 3px 0 0 var(--spine), inset -3px 0 0 var(--spine)}
+  background:repeating-linear-gradient(90deg, #f2f3f4 0 2px, #d5d9df 2px 3px); box-shadow:inset 3px 0 0 var(--spine), inset -3px 0 0 var(--spine)}
 .book::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:skewY(-45deg);
   background:linear-gradient(90deg, rgba(0,0,0,.25), transparent 30%), var(--spine)}
-.book.k-paper{--spine:#0a1f6b; --band:#ffcc00}
-.book.k-study{--spine:#0b7a70; --band:#dff5f1}
-.book.k-both{--spine:#5b21b6; --band:#ffcc00}
+.book.k-paper{--spine:#242b3a; --band:#d6a23e}
+.book.k-study{--spine:#23766f; --band:#a9d9d5}
+.book.k-both{--spine:#5f54b8; --band:#d6a23e}
 /* chosen, a book slides up out of the row */
 .book:is(:hover,:focus-visible){translate:0 -18px}
 .book:focus-visible{outline:2px solid var(--yellow); outline-offset:3px}
@@ -156,11 +156,11 @@ html[data-card-swap]::view-transition-group(card-swap){animation-duration:.4s}
   font:700 10px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
 /* the board sits under the books (z-index), its top running back under them */
 .shelf-board{position:relative; height:16px;
-  background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#e9edf5, #c9d1df)}
+  background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#e5e8ec, #c9ced5)}
 .shelf-board::before{content:""; position:absolute; left:0; bottom:100%; width:100%; height:19px; transform-origin:0 100%; transform:skewX(-45deg);
-  background:linear-gradient(to top, #dfe5ef, #f4f6fa)}
-html[data-theme="night"] .shelf-board{background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#2a3140, #171b24)}
-html[data-theme="night"] .shelf-board::before{background:linear-gradient(to top, #1c2230, #262d3b)}
+  background:linear-gradient(to top, #d5d9df, #f2f3f4)}
+html[data-theme="night"] .shelf-board{background:linear-gradient(90deg, var(--navy) 0 70%, var(--red) 70% 85%, var(--yellow) 85%) 0 100%/100% 4px no-repeat, linear-gradient(#252a31, #14171a)}
+html[data-theme="night"] .shelf-board::before{background:linear-gradient(to top, #1f2328, #30363d)}
 tr.flash > td{animation:row-flash 1.6s ease-out}
 @keyframes row-flash{from{background:color-mix(in srgb, var(--yellow) 42%, transparent)}}
 
@@ -180,11 +180,11 @@ tr.flash > td{animation:row-flash 1.6s ease-out}
 .solid::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:rotateY(90deg); background:var(--side)}
 .solid b{font:800 15px var(--mono)}
 .solid span{font:600 9px var(--mono); letter-spacing:.12em; text-transform:uppercase; opacity:.85}
-.tier.t0 .keep{--face:#0a1f6b; --top:#23408f; --side:#061446}
-.tier.t1 .keep{--face:#1746d1; --top:#4a70e6; --side:#0e33a3}
-.tier.t2 .keep{--face:#6d3fd6; --top:#8e68ea; --side:#4f25b0}
-.tier.t3 .keep{--face:#0f9d6b; --top:#35bf8c; --side:#0a7550}
-.solid.out{--face:#e2001a; --top:#f2465a; --side:#a30012; position:absolute; bottom:0; left:calc(100% + 16px); transform:translateZ(-18px)}
+.tier.t0 .keep{--face:#242b3a; --top:#39465f; --side:#141920}
+.tier.t1 .keep{--face:#3b5ff0; --top:#6884f5; --side:#263da5}
+.tier.t2 .keep{--face:#5f54b8; --top:#8b83d4; --side:#433a8b}
+.tier.t3 .keep{--face:#23766f; --top:#57b7b0; --side:#1c625d}
+.solid.out{--face:#b23b3b; --top:#d9605f; --side:#822929; position:absolute; bottom:0; left:calc(100% + 16px); transform:translateZ(-18px)}
 .tier .keep{position:relative}
 /* each excluded slab hangs off its own stage */
 .tier{justify-content:flex-start}
@@ -200,9 +200,9 @@ tr.flash > td{animation:row-flash 1.6s ease-out}
 .column::after,.column .fill::after{content:""; position:absolute; top:0; left:100%; width:var(--d); height:100%; transform-origin:0 0; transform:rotateY(90deg)}
 .column::before{border:1px dashed color-mix(in srgb, var(--blue) 40%, transparent)}
 .column::after{border:1px dashed color-mix(in srgb, var(--blue) 40%, transparent); background:color-mix(in srgb, var(--blue) 4%, transparent)}
-.column .fill{position:absolute; left:0; right:0; bottom:0; height:calc(var(--pct) * 100%); transform-style:preserve-3d; background:#1746d1}
-.column .fill::before{background:#4a70e6}
-.column .fill::after{background:#0e33a3}
+.column .fill{position:absolute; left:0; right:0; bottom:0; height:calc(var(--pct) * 100%); transform-style:preserve-3d; background:#3b5ff0}
+.column .fill::before{background:#6884f5}
+.column .fill::after{background:#263da5}
 .axis-col-label{font:600 9.5px var(--mono); text-align:center; max-width:66px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted)}
 .axis-col-v{font:700 10.5px var(--mono); color:var(--ink)}
 
@@ -210,23 +210,23 @@ tr.flash > td{animation:row-flash 1.6s ease-out}
    An instrument, so dark in either theme like the Overview monitor. */
 .radar-card{margin-bottom:16px}
 .radar-scope{position:relative; height:clamp(280px, 34vw, 380px); border-radius:var(--radius-sm); overflow:hidden;
-  background:radial-gradient(80% 90% at 50% 55%, #0b1a4a, #040a1c 70%); border:1px solid #13235e; box-shadow:inset 0 0 50px rgba(18,214,143,.08)}
+  background:radial-gradient(80% 90% at 50% 55%, #1c243a, #0a0c10 70%); border:1px solid #303d62; box-shadow:inset 0 0 50px rgba(18,214,143,.08)}
 .radar-scope canvas{position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:pan-y; outline:none}
 .radar-scope canvas:active{cursor:grabbing}
-.radar-scope canvas:focus-visible{outline:2px solid #12d68f; outline-offset:-2px}
+.radar-scope canvas:focus-visible{outline:2px solid #57b7b0; outline-offset:-2px}
 .rs-labels{position:absolute; inset:0; pointer-events:none}
 .rs-labels > span{position:absolute; left:0; top:0; white-space:nowrap; will-change:transform}
 .rs-sector{translate:-50% -50%; font:700 9.5px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:rgba(200,214,255,.82)}
-.rs-sector b{margin-left:6px; color:#ffcc00}
+.rs-sector b{margin-left:6px; color:#d6a23e}
 .rs-ring{translate:5px -50%; font:600 9px var(--mono); color:rgba(160,190,255,.6)}
 .rs-tip{translate:-50% calc(-100% - 12px); max-width:340px; white-space:normal !important; padding:6px 9px; border-radius:8px; font:600 11.5px/1.35 var(--sans); color:#fff;
   background:rgba(4,10,28,.92); border:1px solid rgba(96,138,255,.35); box-shadow:0 10px 24px -12px rgba(0,0,0,.7); opacity:0; transition:opacity .15s}
 .rs-empty{position:absolute; left:50%; bottom:14px; translate:-50% 0; width:90%; margin:0; text-align:center; font:500 10.5px var(--mono); letter-spacing:.06em; color:rgba(200,214,255,.62)}
 .rs-legend{display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; font:600 9.5px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
 .rs-legend i{width:8px; height:8px; border-radius:50%; margin-left:6px}
-.rs-legend .lg-include{background:#12d68f}
-.rs-legend .lg-maybe{background:#ffb020}
-.rs-legend .lg-exclude{background:#ff3b52}
-.rs-legend .lg-none{background:#5ad1ff}
+.rs-legend .lg-include{background:#57b7b0}
+.rs-legend .lg-maybe{background:#d6a23e}
+.rs-legend .lg-exclude{background:#d9605f}
+.rs-legend .lg-none{background:#8ea6ff}
 .stint.flash{animation:row-flash 1.6s ease-out}
 @media(max-width:620px){.rs-legend{display:none}}

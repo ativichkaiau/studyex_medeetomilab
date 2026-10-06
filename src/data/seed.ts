@@ -90,7 +90,7 @@ export function blankProject(id: string, name: string, code: string, opts?: { qu
       exclusion: [],
       databases: ['PubMed / MEDLINE', 'Embase', 'Cochrane CENTRAL'],
       searches: [],
-      registration: 'PROSPERO — to register',
+      registration: undefined,
       screenerUrl: 'https://vestrippn-srma-telemetry.vercel.app',
       outcomeLabel: opts?.outcome ?? 'Outcome',
       indexLabel: opts?.index ?? 'Index',

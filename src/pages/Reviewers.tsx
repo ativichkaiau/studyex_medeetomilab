@@ -54,7 +54,7 @@ export default function Reviewers() {
       const list = comments.map((c, i) => `${i + 1}. ${c.comment.replace(/\n/g, ' ')}`).join('\n')
       const out = await complete(
         [
-          { role: 'system', content: 'You are a methodologist drafting a point-by-point response-to-reviewers for a systematic review & meta-analysis. For each comment, write a courteous, specific 2–4 sentence response that engages the concern and cites the review\'s ACTUAL methods/results (given in context) — never invent data or analyses not listed. Where a change is warranted, say what was revised. Output ONLY a JSON array: [{"n":1,"response":"…"}].' },
+          { role: 'system', content: 'You are a methodologist drafting a point-by-point response-to-reviewers for a systematic review & meta-analysis. For each comment, write a courteous, specific 2–4 sentence response that engages the concern and cites only methods/results explicitly present in context. Never invent data, analyses, manuscript edits, or completed revisions. Where a change is warranted, propose a revision for the author to make and verify. Output ONLY a JSON array: [{"n":1,"response":"…"}].' },
           { role: 'user', content: `Review context:\n${ctx}\n\nReviewer comments:\n${list}` },
         ],
         getModel(),
@@ -80,14 +80,14 @@ export default function Reviewers() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>SYSTEMATIC REVIEW · REVISION</Kicker>
+            <Kicker>output / rebuttal</Kicker>
             <h1 style={{ marginTop: 12 }}>Response to reviewers</h1>
-            <p>Paste the reviewers' report — it's split into individual points automatically. Draft grounded, point-by-point responses (the AI cites only your review's real analyses), edit them, and export the letter.</p>
+            <p>Paste the reviewers' report to split it into individual points. Draft responses from project context, verify every claim and proposed revision, then export the letter.</p>
           </div>
           <div className="row-actions" style={{ flex: 'none', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <button className="btn ghost sm" onClick={() => download(letter, `${slug}-response-to-reviewers.md`, 'text/markdown')} disabled={!comments.length}>⤓ Markdown</button>
             <button className="btn ghost sm" onClick={() => { navigator.clipboard?.writeText(letter); setCopied(true); setTimeout(() => setCopied(false), 1500) }} disabled={!comments.length}>{copied ? 'Copied ✓' : 'Copy letter'}</button>
-            <button className="btn primary sm" onClick={draftAll} disabled={aiOn || !comments.length}>{aiOn ? 'Drafting…' : '✦ Draft all responses'}</button>
+            <button className="btn primary sm" onClick={draftAll} disabled={aiOn || !comments.length}>{aiOn ? 'Drafting…' : 'terra · draft all responses'}</button>
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function Reviewers() {
             <span><span className="sq" style={{ background: 'var(--blue)' }} />REVIEWERS' REPORT</span>
             <span className="small mono muted">{comments.length} point{comments.length === 1 ? '' : 's'}{drafted > 0 ? ` · ${drafted} drafted` : ''}</span>
           </div>
-          <textarea className="textarea" rows={12} style={{ width: '100%' }} placeholder="Paste the reviewers' comments here…" value={raw} onChange={(e) => setRaw(e.target.value)} />
+          <textarea className="textarea" aria-label="Reviewer comments" rows={12} style={{ width: '100%' }} placeholder="Paste the reviewers' comments here…" value={raw} onChange={(e) => setRaw(e.target.value)} />
           {!raw && <button className="btn ghost sm" style={{ marginTop: 8 }} onClick={() => setRaw(SAMPLE)}>Load a sample report</button>}
 
           {comments.length > 0 && (
@@ -109,7 +109,7 @@ export default function Reviewers() {
                 <div key={c.id} className="pblock" style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 12, marginBottom: 12 }}>
                   <div className="small mono" style={{ color: 'var(--blue)', fontWeight: 700, marginBottom: 4 }}>{c.label}</div>
                   <div className="small" style={{ fontStyle: 'italic', marginBottom: 8, whiteSpace: 'pre-wrap' }}>{c.comment}</div>
-                  <textarea className="textarea" rows={3} style={{ width: '100%', fontSize: 13 }} placeholder="Response… (or use ✦ Draft all)" value={responses[c.id] ?? ''} onChange={(e) => setResponses((p) => ({ ...p, [c.id]: e.target.value }))} />
+                  <textarea className="textarea" rows={3} style={{ width: '100%', fontSize: 13 }} placeholder="Response… (or use terra · draft all)" value={responses[c.id] ?? ''} onChange={(e) => setResponses((p) => ({ ...p, [c.id]: e.target.value }))} />
                 </div>
               ))}
             </div>
@@ -126,7 +126,7 @@ export default function Reviewers() {
           )}
         </div>
       </div>
-      <p className="small muted" style={{ marginTop: 10 }}>The AI drafts from your review's real methods and results (PRISMA, sensitivity, small-study tests, GRADE) — it won't cite analyses you didn't run. Always verify each response and adjust claims about specific revisions before sending.</p>
+      <p className="small muted" style={{ marginTop: 10 }}>Terra receives this review's methods and results as context. Check each response against the manuscript and confirm any proposed revision before sending.</p>
     </>
   )
 }

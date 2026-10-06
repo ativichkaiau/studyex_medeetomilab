@@ -9,7 +9,7 @@ export default function NotFound() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>OFF THE MAP · 404</Kicker>
+        <Kicker>route / 404</Kicker>
         <h1>This route isn’t on the grid</h1>
         <p>
           Nothing is mapped to <code className="inl">#{loc.pathname}</code>. It may have moved, or the

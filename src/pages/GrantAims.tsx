@@ -17,7 +17,7 @@ function download(content: string, name: string, type: string) {
   a.click()
   URL.revokeObjectURL(url)
 }
-const powerColor = (p: number) => (p >= 0.8 ? '#12b981' : p >= 0.6 ? '#f59e0b' : '#e2001a')
+const powerColor = (p: number) => (p >= 0.8 ? 'var(--success)' : p >= 0.6 ? 'var(--warning)' : 'var(--danger)')
 
 export default function GrantAims() {
   const { state } = useStore()
@@ -63,14 +63,14 @@ export default function GrantAims() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>EXPERIMENTS · GRANT</Kicker>
+            <Kicker>bench / specific_aims</Kicker>
             <h1 style={{ marginTop: 12 }}>Specific Aims generator</h1>
-            <p>Your hypotheses, the assays that test them (with power and budget), and the review's clinical premise, assembled into an NIH-style one-page Specific Aims. Draft deterministically, then polish with AI.</p>
+            <p>Your hypotheses, the assays that test them (with power and budget), and the review's clinical premise, assembled into an NIH-style one-page Specific Aims. Draft deterministically, then polish with Terra.</p>
           </div>
           <div className="row-actions" style={{ flex: 'none', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <button className="btn ghost sm" onClick={() => download(exportMd, `${slug}-specific-aims.md`, 'text/markdown')}>⤓ Markdown</button>
             <button className="btn ghost sm" onClick={() => { navigator.clipboard?.writeText(exportMd); setCopied(true); setTimeout(() => setCopied(false), 1500) }}>{copied ? 'Copied ✓' : 'Copy'}</button>
-            {aiOn ? <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn primary sm" onClick={polish}>✦ AI polish</button>}
+            {aiOn ? <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn primary sm" onClick={polish}>terra · polish</button>}
           </div>
         </div>
       </div>
@@ -83,15 +83,15 @@ export default function GrantAims() {
       ) : (
         <>
           <div className="grid g4" style={{ marginBottom: 16 }}>
-            <StatCard value={plan.aims.length} label="Specific Aims" sub={`${state.hypotheses.length} hypotheses`} tone="#7c3aed" />
-            <StatCard value={`${poweredAims}/${plan.aims.length}`} label="Aims ≥ 80% power" sub="adequately powered" tone="#12b981" />
-            <StatCard value={plan.totalCost >= 1000 ? `$${(plan.totalCost / 1000).toFixed(1)}M` : `$${Math.round(plan.totalCost)}k`} label="Total budget" sub={`${plan.aims.reduce((a, x) => a + x.approaches.length, 0)} assays`} tone="#1746d1" />
-            <StatCard value={`${months} mo`} label="Timeline" sub={`${plan.totalWeeks} weeks`} tone="#ea580c" />
+            <StatCard value={plan.aims.length} label="Specific Aims" sub={`${state.hypotheses.length} hypotheses`} tone="var(--violet)" />
+            <StatCard value={`${poweredAims}/${plan.aims.length}`} label="Aims ≥ 80% power" sub="adequately powered" tone="var(--success)" />
+            <StatCard value={plan.totalCost >= 1000 ? `$${(plan.totalCost / 1000).toFixed(1)}M` : `$${Math.round(plan.totalCost)}k`} label="Total budget" sub={`${plan.aims.reduce((a, x) => a + x.approaches.length, 0)} assays`} tone="var(--accent)" />
+            <StatCard value={`${months} mo`} label="Timeline" sub={`${plan.totalWeeks} weeks`} tone="var(--warning)" />
           </div>
 
           {(aiText || aiOn) && (
-            <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--violet, #7c3aed)' } as CSSProperties}>
-              <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #7c3aed)' }} />AI-POLISHED SPECIFIC AIMS{aiOn ? ' · streaming…' : ''}</div>
+            <div className="card lg rail" style={{ marginBottom: 16, ['--rail' as string]: 'var(--violet, var(--violet))' } as CSSProperties}>
+              <div className="card-h"><span className="sq" style={{ background: 'var(--violet, var(--violet))' }} />terra · polished specific aims{aiOn ? ' · streaming…' : ''}</div>
               {aiText ? <Markdown text={aiText} /> : <Sk kind="aims" parts={plan.aims.map((_, i) => `Aim ${i + 1}`)} />}
             </div>
           )}
@@ -102,7 +102,7 @@ export default function GrantAims() {
               <div className="manuscript" style={{ fontSize: 13.5 }}><Markdown text={scaffold} /></div>
             </div>
             <div className="card lg">
-              <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #7c3aed)' }} />AIMS · POWER &amp; BUDGET</div>
+              <div className="card-h"><span className="sq" style={{ background: 'var(--violet, var(--violet))' }} />AIMS · POWER &amp; BUDGET</div>
               {plan.aims.map((a) => (
                 <div key={a.hypId} className="aim-row" style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
                   <div className="flex" style={{ justifyContent: 'space-between', gap: 8 }}>

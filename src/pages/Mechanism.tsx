@@ -75,7 +75,7 @@ export default function Mechanism() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>MECHANISM MAP · MOLECULE → PHENOTYPE</Kicker>
+        <Kicker>knowledge / mechanism · molecule → phenotype</Kicker>
         <h1>Mechanism Map</h1>
         <p>The causal chain from molecule to phenotype as a top-down cascade, each edge coloured by how well-supported it is. Click a node to light up its full upstream path; bridge a weak link by planning the assay that would prove it.</p>
         <div className="head-actions">

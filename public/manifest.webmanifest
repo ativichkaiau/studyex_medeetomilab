@@ -1,17 +1,18 @@
 {
-  "name": "WilliamsLab — Research OS",
-  "short_name": "WilliamsLab",
-  "description": "A translational-research operating system: systematic reviews, meta-analysis, and lab science in one place.",
+  "name": "studyex_medeetomilab — Research Runtime",
+  "short_name": "medeetomilab",
+  "description": "Evidence synthesis, systematic reviews, research QA, and manuscript work in one research runtime.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#eef1f8",
-  "theme_color": "#0a1f6b",
+  "background_color": "#08090a",
+  "theme_color": "#08090a",
   "orientation": "any",
   "categories": ["productivity", "medical", "education"],
   "icons": [
-    { "src": "/williams.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }

@@ -37,7 +37,7 @@ export default function PitWall() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>PROJECT DASHBOARD</Kicker>
+        <Kicker>program / dashboard</Kicker>
         <h1>Dashboard</h1>
         <p>{state.project.name}</p>
       </div>

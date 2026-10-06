@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
+import { Link } from 'react-router-dom'
 import { Kicker, Rule } from '../components/ui'
 
 type ListKey = 'inclusion' | 'exclusion' | 'databases'
@@ -30,7 +31,7 @@ export default function SrmaProtocol() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <Kicker>SYSTEMATIC REVIEW · PROTOCOL</Kicker>
+            <Kicker>pipeline / 01 protocol · define</Kicker>
             <h1 style={{ marginTop: 12 }}>Review protocol</h1>
             {editing
               ? <textarea className="textarea" style={{ width: '100%', maxWidth: 900, fontWeight: 600 }} rows={2} value={r.title} onChange={(e) => updateReview({ title: e.target.value })} placeholder="Review title" />
@@ -119,7 +120,7 @@ export default function SrmaProtocol() {
         <div className="grid g2">
           <div className="card lg">
             <div className="card-h"><span className="sq" style={{ background: 'var(--amber)' }} />REGISTRATION &amp; METHODS</div>
-            <div className="kv"><span className="k">Registration</span><input className="input" style={{ maxWidth: 320 }} value={r.registration ?? ''} onChange={(e) => updateReview({ registration: e.target.value })} placeholder="PROSPERO CRD…" /></div>
+            <div className="kv"><span className="k">Registration</span><input className="input" aria-label="Review registration identifier" style={{ maxWidth: 320 }} value={r.registration ?? ''} onChange={(e) => updateReview({ registration: e.target.value })} placeholder="PROSPERO CRD…" /></div>
             <div className="kv"><span className="k">Effect measure</span><span className="val">{r.effect} · {r.indexLabel} vs {r.comparatorLabel} <span className="small muted">(set on Meta-analysis)</span></span></div>
             <div className="kv"><span className="k">Synthesis</span><span className="val">Inverse-variance {r.model}-effects; heterogeneity by I² / τ²</span></div>
             <div className="kv"><span className="k">Risk of bias</span><span className="val">{r.robTool ? <><b>{r.robTool}</b> — </> : null}{r.robDomains.join(', ')}</span></div>
@@ -127,9 +128,9 @@ export default function SrmaProtocol() {
           </div>
           <div className="card lg rail">
             <div className="card-h"><span className="sq" style={{ background: 'var(--accent, var(--blue))' }} />SCREENING</div>
-            <p className="small" style={{ marginBottom: 12 }}>Title/abstract and full-text screening run in your dedicated screener. Its counts feed the <b>PRISMA flow</b> here.</p>
-            <a className="btn primary" href={r.screenerUrl} target="_blank" rel="noreferrer">Open the SRMA screener ↗</a>
-            <p className="small mono" style={{ marginTop: 10, wordBreak: 'break-all' }}>{r.screenerUrl}</p>
+            <p className="small" style={{ marginBottom: 12 }}>Screen records and resolve conflicts in this project. Decisions feed the screening log and are checked against PRISMA counts.</p>
+            <Link className="btn primary" to="/screening">Open screening →</Link>
+            {r.screenerUrl && <p className="small mono" style={{ marginTop: 10, wordBreak: 'break-all' }}>External screener: <a href={r.screenerUrl} target="_blank" rel="noreferrer">{r.screenerUrl}</a></p>}
           </div>
         </div>
       </div>

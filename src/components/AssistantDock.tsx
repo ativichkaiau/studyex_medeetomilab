@@ -9,22 +9,11 @@ import { retrieve, groundingBlock } from '../lib/theoryRag'
 import { searchPubmed } from '../lib/pubmed'
 import { STAGES } from '../types'
 import { analysisIncluded } from '../lib/cohorts'
+import { moduleFor } from '../lib/modules'
+import { TERRA_OPEN, TERRA_TASKS, type TerraRequest } from '../lib/terra'
+import { MetaGrid, Tag } from './ui'
 
 type Msg = { role: 'user' | 'assistant'; content: string; sources?: string[] }
-
-const PAGE: Record<string, string> = {
-  '/': 'Overview',
-  '/pit-wall': 'Dashboard',
-  '/hypotheses': 'Hypotheses',
-  '/mechanism': 'Mechanism Map',
-  '/assays': 'Assays',
-  '/radar': 'Literature',
-  '/power': 'Statistical Power',
-  '/suspension': 'Rigor Monitor',
-  '/graph': 'Knowledge Graph',
-  '/theory': 'Theory',
-  '/review': 'Knowledge Review',
-}
 
 const fn = (name: string, description: string, properties: Record<string, unknown>, required: string[] = []): ToolDef => ({
   type: 'function',
@@ -57,7 +46,11 @@ const TOOLS: ToolDef[] = [
 export default function AssistantDock() {
   const { state, addStudy, addHypothesis, setStage, importStudiesToGraph } = useStore()
   const loc = useLocation()
-  const page = PAGE[loc.pathname] ?? 'WilliamsLab'
+  const mod = moduleFor(loc.pathname)
+  const page = mod?.title ?? 'Project overview'
+  const tasks = TERRA_TASKS[mod?.stage ?? mod?.id ?? 'overview'] ?? TERRA_TASKS.overview
+  const ready = hasKey()
+  const inputRef = useRef<HTMLTextAreaElement | null>(null)
 
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Msg[]>([])
@@ -72,18 +65,30 @@ export default function AssistantDock() {
     endRef.current?.scrollIntoView({ block: 'end' })
   }, [messages, open])
 
-  // opened from the command palette's "Ask the AI copilot" action
+  // opened from anywhere (top bar, status bar, palette, a module's task):
+  // a task is placed in the input to send — never sent on its own
   useEffect(() => {
-    const onOpen = () => setOpen(true)
-    window.addEventListener('wl-open-copilot', onOpen)
-    return () => window.removeEventListener('wl-open-copilot', onOpen)
+    const onOpen = (e: Event) => {
+      const req = (e as CustomEvent<TerraRequest | undefined>).detail
+      setOpen(true)
+      if (req?.prompt) setInput(req.prompt)
+      window.setTimeout(() => inputRef.current?.focus(), 30)
+    }
+    window.addEventListener(TERRA_OPEN, onOpen)
+    return () => window.removeEventListener(TERRA_OPEN, onOpen)
   }, [])
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
 
   function system(): ChatMessage {
     const hyps = state.hypotheses.map((h) => `- ${h.label}`).join('\n')
     return {
       role: 'system',
-      content: `You are the WilliamsLab research copilot. Stay within the active project's topic and context. The user is currently on the "${page}" page.
+      content: `You are Terra, the intelligence layer of studyex_medeetomilab, a research runtime for systematic reviews, meta-analysis, evidence synthesis and research QA. Stay within the active project's topic and context. The user is currently in the "${page}" module.
 
 Project: "${state.project.name}" (stage: ${state.project.stage ?? 'n/a'}).
 Domain: ${state.project.domain}
@@ -137,7 +142,7 @@ Be concise and practical. Use markdown (## headings, **bold**, - bullets). Help 
     const q = text.trim()
     if (!q || streaming) return
     if (!hasKey()) {
-      setMessages((m) => [...m, { role: 'assistant', content: '_No OpenAI key set. Add one in **Knowledge Review → Settings** (stored only in your browser)._' }])
+      setMessages((m) => [...m, { role: 'assistant', content: '_Terra is off: no OpenAI key. Add one in **Knowledge review → Settings** (stored only in this browser)._' }])
       return
     }
     setInput('')
@@ -192,50 +197,51 @@ Be concise and practical. Use markdown (## headings, **bold**, - bullets). Help 
     }
   }
 
-  const suggestions = [
-    `Summarize the ${page} page`,
-    `Search PubMed for ${state.review.question || state.project.name}`,
-    'Explain the theory behind my central hypothesis',
-    'Import my review studies onto the graph',
-  ]
-
-  if (!open) {
-    return (
-      <Portal>
-        <button className="ai-fab" onClick={() => setOpen(true)} aria-label="Open AI copilot">
-          <span className="spark">✦</span> Ask AI
-          <span className="rdot" />
-        </button>
-      </Portal>
-    )
-  }
+  if (!open) return null
 
   return (
     <Portal>
-      <div className="ai-panel" role="dialog" aria-label="AI copilot">
+      <div className="ai-panel" role="dialog" aria-label="Terra">
         <div className="ai-head">
-          <div className="avatar">✦</div>
-          <div className="t">Research copilot<small>{page} · {getModel()}</small></div>
+          <div className="t">terra</div>
+          <Tag tone={ready ? 'ok' : 'idle'}>{ready ? 'ready' : 'off'}</Tag>
           <span className="sp" />
-          <button className={`tool-toggle${tools ? ' on' : ''}`} onClick={() => setTools((v) => !v)} title="Let the copilot act on your project (add study, set stage, search PubMed…)">⚙ Tools {tools ? 'on' : 'off'}</button>
-          {messages.length > 0 && <button className="ai-x" onClick={() => setMessages([])} title="Clear" style={{ marginRight: 6 }}>⟲</button>}
-          <button className="ai-x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+          <button className={`tool-toggle${tools ? ' on' : ''}`} onClick={() => setTools((v) => !v)} aria-pressed={tools} title="Let Terra act on the project (add a study, add a hypothesis, set the stage, search PubMed)">tools: {tools ? 'on' : 'off'}</button>
+          {messages.length > 0 && <button className="ai-x" onClick={() => setMessages([])} title="Clear the thread">clear</button>}
+          <button className="ai-x" onClick={() => setOpen(false)} aria-label="Close Terra">✕</button>
+        </div>
+        <div className="terra-ctx">
+          <MetaGrid rows={[
+            ['context', <span className="mono">{mod?.id ?? 'project'}</span>],
+            ['scope', <span className="mono">{state.project.code}</span>],
+            ['model', <span className="mono">{getModel()}</span>],
+          ]} />
         </div>
 
         <div className="ai-thread">
           {messages.length === 0 ? (
-            <div className="ai-empty">
-              <b>Ask anything</b> about {state.project.code}, its theory, hypotheses, statistics, or this page — or ask me to <b>do</b> something (add a study, set the stage, search PubMed).
-              <div className="ai-sugg">
-                {suggestions.map((s) => (
-                  <button key={s} className="chip-btn" onClick={() => send(s)}>{s}</button>
-                ))}
-              </div>
+            <div className="terra-tasks">
+              <div className="insp-sec">tasks · {mod?.id ?? 'overview'}</div>
+              {tasks.map((t) => (
+                <button key={t.label} className="terra-task" onClick={() => { setInput(t.prompt); inputRef.current?.focus() }}>
+                  <span className="mono">{t.label} →</span>
+                  <small>{t.prompt}</small>
+                </button>
+              ))}
+              {(mod?.stage || mod?.id) !== 'overview' && TERRA_TASKS.overview.map((t) => (
+                <button key={t.label} className="terra-task" onClick={() => { setInput(t.prompt); inputRef.current?.focus() }}>
+                  <span className="mono">{t.label} →</span>
+                  <small>{t.prompt}</small>
+                </button>
+              ))}
+              <p className="small" style={{ marginTop: 10 }}>{ready
+                ? <>Terra reads this project and the module you're in{tools ? ', and can act on it with tools' : ''}. A task fills the input; nothing is sent until you send it.</>
+                : <>Terra is off. Add an OpenAI key in <b>Knowledge review → Settings</b>; it is stored only in this browser.</>}</p>
             </div>
           ) : (
             messages.map((m, i) => (
               <div key={i} className={`ai-msg ${m.role}`}>
-                {m.role === 'assistant' ? (m.content ? <Markdown text={m.content} /> : <Sk kind="answer" label="Thinking" />) : m.content}
+                {m.role === 'assistant' ? (m.content ? <Markdown text={m.content} /> : <Sk kind="answer" label="working" />) : m.content}
                 {m.role === 'assistant' && m.sources && m.sources.length > 0 && (
                   <div className="msg-meta">{m.sources.map((s) => <span key={s} className="src-chip">§ {s}</span>)}</div>
                 )}
@@ -247,8 +253,9 @@ Be concise and practical. Use markdown (## headings, **bold**, - bullets). Help 
 
         <div className="ai-foot">
           <textarea
+            ref={inputRef}
             className="textarea"
-            rows={1}
+            rows={2}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -257,15 +264,16 @@ Be concise and practical. Use markdown (## headings, **bold**, - bullets). Help 
                 send(input)
               }
             }}
-            placeholder={tools ? 'Ask or instruct the copilot…' : 'Ask the copilot…'}
+            placeholder={tools ? 'instruct terra…' : 'ask terra…'}
+            aria-label="Message Terra"
           />
           {streaming ? (
-            <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>Stop</button>
+            <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>stop</button>
           ) : (
-            <button className="btn primary sm" onClick={() => send(input)} disabled={!input.trim()}>Send</button>
+            <button className="btn primary sm" onClick={() => send(input)} disabled={!input.trim()}>send</button>
           )}
         </div>
-        <div className="ai-note">{tools ? 'Tools on · the copilot can edit your project' : 'Educational · verify against primary sources'}</div>
+        <div className="ai-note">{tools ? 'tools on · terra can edit this project' : 'tools off · read-only'} · your OpenAI key · verify against primary sources</div>
       </div>
     </Portal>
   )

@@ -113,10 +113,10 @@ void main() {
 }`
 
 const VERDICT: Record<string, { color: string; height: number }> = {
-  include: { color: '#12d68f', height: 0.3 },
-  maybe: { color: '#ffb020', height: 0.19 },
-  exclude: { color: '#ff3b52', height: 0.08 },
-  none: { color: '#5ad1ff', height: 0.035 },
+  include: { color: '#57b7b0', height: 0.3 },
+  maybe: { color: '#d6a23e', height: 0.19 },
+  exclude: { color: '#d9605f', height: 0.08 },
+  none: { color: '#8ea6ff', height: 0.035 },
 }
 
 export function mountRadar(canvas: HTMLCanvasElement, overlay: HTMLElement, onPick: (key: string) => void): RadarApi {

@@ -75,7 +75,7 @@ function ProjectEvidenceLibrary() {
   const shown = e.passages.filter((p) => `${p.title} ${p.text} ${p.design} ${p.locator}`.toLowerCase().includes(query.toLowerCase()))
   const claim = e.claims.find((c) => c.id === selectedClaim)
   return <>
-    <div className="page-head"><Rule /><Kicker>PROJECT KNOWLEDGE · {state.project.code}</Kicker><h1>Evidence</h1><p>Keep the passage, its context, and your interpretation together. Link evidence from any claim in Theory or the manuscript.</p><div className="head-actions"><Link className="btn ghost sm" to="/theory">Living Theory →</Link><Link className="btn ghost sm" to="/studies">Cohort review →</Link></div></div>
+    <div className="page-head"><Rule /><Kicker>knowledge / evidence</Kicker><h1>Evidence</h1><p>Keep the passage, its context, and your interpretation together. Link evidence from any claim in Theory or the manuscript.</p><div className="head-actions"><Link className="btn ghost sm" to="/theory">Living Theory →</Link><Link className="btn ghost sm" to="/studies">Cohort review →</Link></div></div>
     <ProjectTabs />
     <PublicationWatch />
     <div className="evidence-layout">

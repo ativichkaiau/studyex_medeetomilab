@@ -187,17 +187,17 @@ function ProjectTheoryPage() {
     <>
       <div className="page-head">
         <Rule />
-        <Kicker>PROJECT KNOWLEDGE · {state.project.code}</Kicker>
+        <Kicker>knowledge / theory</Kicker>
         <h1>Theory</h1>
         <p>{state.project.name}</p>
       </div>
       <ProjectTabs />
       <div className="theory-intro card lg rail">
-        <div className="project-caption"><b>{state.project.code}</b><span className="pill">{curated ? 'Curated reference' : draft ? 'AI draft' : 'Ready to write'}</span></div>
+        <div className="project-caption"><b>{state.project.code}</b><span className="pill">{curated ? 'Curated reference' : draft ? 'terra draft' : 'Ready to write'}</span></div>
         <h2>{curated ? 'Brugada Syndrome' : draft?.title || 'Build the foundation for this project'}</h2>
         <p>{curated
           ? 'The curated Brugada reference for this project: foundations, mechanisms, clinical features, and the epigenetic research frontier. Explore the sections, sources, and self-check quiz.'
-          : draft?.summary || 'AI will write a theory chapter from this project’s topic, review question, PICO, hypotheses, and saved reference titles. The chapter and reading progress are saved with this project.'}</p>
+          : draft?.summary || 'Terra will write a theory chapter from this project’s topic, review question, PICO, hypotheses, and saved reference titles. The chapter and reading progress are saved with this project.'}</p>
         <div className="wrap-gap">
           <Link className="btn ghost sm" to="/review">Ask about this project →</Link>
           <Link className="btn ghost sm" to="/pit-wall">Dashboard →</Link>
@@ -207,7 +207,7 @@ function ProjectTheoryPage() {
 
       {!curated && (
         <div className="card theory-generator" aria-busy={generating}>
-          <div className="card-h"><span className="sq" />{draft ? 'REFINE THE THEORY' : 'WRITE WITH AI'}</div>
+          <div className="card-h"><span className="sq" />{draft ? 'REFINE THE THEORY' : 'write with terra'}</div>
           {!draft && <p className="small">{state.review.question || state.project.centralHypothesis || 'Add a review question in Protocol for a more focused chapter, or start from the project title.'}</p>}
           <label className="fld">
             <span className="fld-l">Focus <span className="muted">· optional</span></span>
@@ -229,7 +229,7 @@ function ProjectTheoryPage() {
       {sections.length > 0 && <TheoryReader key={`${state.project.id}-${draft?.generatedAt ?? 'curated'}`} sections={sections} curated={curated} />}
       {!curated && draft && draft.sources.length > 0 && (
         <div className="card theory-sources">
-          <div className="card-h">PROJECT REFERENCES SUPPLIED TO AI</div>
+          <div className="card-h">project references supplied to terra</div>
           <p className="small">Titles and identifiers were supplied as context. The model has not read the full papers.</p>
           <ul className="cite-list">{draft.sources.map((s) => {
             const url = s.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${encodeURIComponent(s.pmid)}/` : s.doi ? `https://doi.org/${encodeURIComponent(s.doi)}` : null

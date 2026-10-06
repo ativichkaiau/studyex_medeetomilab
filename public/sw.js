@@ -1,19 +1,20 @@
-/* WilliamsLab service worker — offline-capable app shell.
-   Runtime caching (no precache manifest) so hashed Vite assets just work:
+/* medeetomilab service worker — offline-capable app shell.
+   The build fills PRECACHE and the cache version with all hashed Vite assets:
    - same-origin navigations: network-first, fall back to the cached shell
    - same-origin assets: stale-while-revalidate
    - cross-origin (PubMed / OpenAI): always network, never cached
 */
-const CACHE = 'williamslab-v2'
-const SHELL = ['/', '/index.html', '/williams.png', '/favicon.svg', '/icon.svg', '/manifest.webmanifest']
+const CACHE = 'medeetomilab-dev'
+const SHELL = ['/', '/index.html', '/favicon.svg', '/icon.svg', '/icon-180.png', '/icon-512.png', '/manifest.webmanifest']
+const PRECACHE = []
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()))
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll([...new Set([...SHELL, ...PRECACHE])])).then(() => self.skipWaiting()))
 })
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => (k.startsWith('medeetomilab-') || k === 'williamslab-v2') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
   )
 })
 

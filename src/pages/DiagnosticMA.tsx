@@ -17,7 +17,7 @@ export default function DiagnosticMA() {
 
   const setDx = (list: DiagnosticStudy[]) => updateReview({ dxStudies: list })
   const patchDx = (id: string, patch: Partial<DiagnosticStudy>) => setDx(dx.map((s) => (s.id === id ? { ...s, ...patch } : s)))
-  const addDx = () => setDx([...dx, { id: newId(), author: 'New', year: new Date().getFullYear(), test: 'Index test', tp: 10, fp: 2, fn: 3, tn: 40, include: true }])
+  const addDx = () => setDx([...dx, { id: newId(), author: '', year: new Date().getFullYear(), test: '', include: false }])
   const removeDx = (id: string) => setDx(dx.filter((s) => s.id !== id))
   const num = (v: string) => (v === '' ? undefined : Math.max(0, Math.round(+v)))
 
@@ -27,9 +27,9 @@ export default function DiagnosticMA() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>SYSTEMATIC REVIEW · TEST ACCURACY</Kicker>
+            <Kicker>pipeline / 06 statistics / diagnostic · compute</Kicker>
             <h1 style={{ marginTop: 12 }}>Diagnostic meta-analysis</h1>
-            <p>Pooled sensitivity &amp; specificity of the index test against a reference standard, with a Moses–Littenberg summary ROC. Built for ajmaline / type-1 ECG as a Brugada diagnostic.</p>
+            <p>Pooled sensitivity and specificity of an index test against a reference standard, with a Moses–Littenberg summary ROC.</p>
           </div>
           <div className="row-actions" style={{ flex: 'none' }}>
             <button className="btn primary sm" onClick={addDx}>＋ Add 2×2</button>
@@ -40,17 +40,17 @@ export default function DiagnosticMA() {
       {!res ? (
         <div className="card note">
           <div className="card-h"><span className="sq" style={{ background: 'var(--amber)' }} />NEEDS ≥ 2 STUDIES</div>
-          <p className="small">Add at least two diagnostic-accuracy 2×2 tables (true/false positives &amp; negatives) with the <b>include</b> box ticked. Each row is one study of an index test versus a reference standard.</p>
+            <p className="small">Add at least two diagnostic accuracy 2×2 tables (true/false positives and negatives), then include completed rows. A new row starts blank and excluded from pooling.</p>
           <button className="btn primary sm" style={{ marginTop: 10 }} onClick={addDx}>＋ Add the first 2×2</button>
           {dx.length > 0 && <DxTable dx={dx} res={null} patchDx={patchDx} removeDx={removeDx} num={num} />}
         </div>
       ) : (
         <>
           <div className="grid g4" style={{ marginBottom: 16 }}>
-            <StatCard value={pct(res.sens)} label="Pooled sensitivity" sub={`[${pct(res.sensLow)}, ${pct(res.sensHigh)}]`} tone="#0d9488" />
-            <StatCard value={pct(res.spec)} label="Pooled specificity" sub={`[${pct(res.specLow)}, ${pct(res.specHigh)}]`} tone="#1746d1" />
-            <StatCard value={fmt(res.dor, 1)} label="Diagnostic OR" sub={`LR+ ${fmt(res.lrPos, 1)} · LR− ${fmt(res.lrNeg, 2)}`} tone="#7c3aed" />
-            <StatCard value={res.sroc ? fmt(res.sroc.auc, 3) : '—'} label="SROC area (AUC)" sub={`${res.k} studies pooled`} tone="#e2001a" />
+            <StatCard value={pct(res.sens)} label="Pooled sensitivity" sub={`[${pct(res.sensLow)}, ${pct(res.sensHigh)}]`} tone="var(--research)" />
+            <StatCard value={pct(res.spec)} label="Pooled specificity" sub={`[${pct(res.specLow)}, ${pct(res.specHigh)}]`} tone="var(--accent)" />
+            <StatCard value={fmt(res.dor, 1)} label="Diagnostic OR" sub={`LR+ ${fmt(res.lrPos, 1)} · LR− ${fmt(res.lrNeg, 2)}`} tone="var(--violet)" />
+            <StatCard value={res.sroc ? fmt(res.sroc.auc, 3) : '—'} label="SROC area (AUC)" sub={`${res.k} studies pooled`} tone="var(--danger)" />
           </div>
 
           <div className="grid g2">
@@ -64,7 +64,7 @@ export default function DiagnosticMA() {
               </p>
             </div>
             <div className="card lg">
-              <div className="card-h"><span className="sq" style={{ background: 'var(--teal, #0d9488)' }} />COUPLED FOREST · sensitivity &amp; specificity</div>
+              <div className="card-h"><span className="sq" style={{ background: 'var(--teal, var(--research))' }} />COUPLED FOREST · sensitivity &amp; specificity</div>
               <FigureFrame name="sens-spec-forest">
                 <CoupledForest res={res} />
               </FigureFrame>
@@ -82,7 +82,7 @@ export default function DiagnosticMA() {
           </div>
 
           <div className="card lg" style={{ marginTop: 16 }}>
-            <div className="card-h"><span className="sq" style={{ background: 'var(--violet, #7c3aed)' }} />STUDIES · 2×2 DATA</div>
+            <div className="card-h"><span className="sq" style={{ background: 'var(--violet, var(--violet))' }} />STUDIES · 2×2 DATA</div>
             <DxTable dx={dx} res={res} patchDx={patchDx} removeDx={removeDx} num={num} />
             <p className="small" style={{ marginTop: 8 }}>TP / FP / FN / TN against the reference standard. Untick <b>include</b> to hold a study out. Empty cells get a 0.5 continuity correction for the rate calculations.</p>
           </div>
@@ -102,7 +102,7 @@ function DxTable({ dx, res, patchDx, removeDx, num }: {
 }) {
   const rowFor = (id: string): DxRow | undefined => res?.rows.find((x) => x.id === id)
   const cell = (s: DiagnosticStudy, key: 'tp' | 'fp' | 'fn' | 'tn') => (
-    <td><input className="input mono" style={{ width: 58, padding: '4px 6px' }} type="number" min="0" value={s[key] ?? ''} onChange={(e) => patchDx(s.id, { [key]: num(e.target.value) })} /></td>
+    <td><input className="input mono" aria-label={`${key.toUpperCase()} for ${s.author || 'untitled study'}`} style={{ width: 58, padding: '4px 6px' }} type="number" min="0" value={s[key] ?? ''} onChange={(e) => patchDx(s.id, { [key]: num(e.target.value) })} /></td>
   )
   return (
     <div className="tbl-scroll" style={{ marginTop: 10 }}>
@@ -117,10 +117,10 @@ function DxTable({ dx, res, patchDx, removeDx, num }: {
             const row = rowFor(s.id)
             const bad = s.include && !dxUsable(s)
             return (
-              <tr key={s.id} style={s.include ? undefined : { opacity: 0.5 }}>
-                <td><input type="checkbox" checked={s.include} onChange={(e) => patchDx(s.id, { include: e.target.checked })} /></td>
-                <td><input className="input" style={{ width: 118, padding: '4px 6px' }} value={s.author} onChange={(e) => patchDx(s.id, { author: e.target.value })} /> <input className="input mono" style={{ width: 56, padding: '4px 6px' }} type="number" value={s.year} onChange={(e) => patchDx(s.id, { year: +e.target.value || s.year })} /></td>
-                <td><input className="input" style={{ width: 130, padding: '4px 6px' }} value={s.test ?? ''} onChange={(e) => patchDx(s.id, { test: e.target.value })} /></td>
+              <tr key={s.id} style={s.include ? undefined : { background: 'var(--bg-inset)' }}>
+                <td><input type="checkbox" aria-label={`Include ${s.author || 'untitled study'} in diagnostic meta-analysis`} checked={s.include} onChange={(e) => patchDx(s.id, { include: e.target.checked })} /></td>
+                <td><input className="input" aria-label="Diagnostic study author" style={{ width: 118, padding: '4px 6px' }} value={s.author} onChange={(e) => patchDx(s.id, { author: e.target.value })} /> <input className="input mono" aria-label={`Year for ${s.author || 'untitled study'}`} style={{ width: 56, padding: '4px 6px' }} type="number" value={s.year} onChange={(e) => patchDx(s.id, { year: +e.target.value || s.year })} /></td>
+                <td><input className="input" aria-label={`Index test for ${s.author || 'untitled study'}`} style={{ width: 130, padding: '4px 6px' }} value={s.test ?? ''} onChange={(e) => patchDx(s.id, { test: e.target.value })} /></td>
                 {cell(s, 'tp')}{cell(s, 'fp')}{cell(s, 'fn')}{cell(s, 'tn')}
                 <td className="mono">{row ? pct(row.sens) : bad ? <span style={{ color: 'var(--red)' }}>?</span> : '—'}</td>
                 <td className="mono">{row ? pct(row.spec) : bad ? <span style={{ color: 'var(--red)' }}>?</span> : '—'}</td>
@@ -213,8 +213,8 @@ function CoupledForest({ res }: { res: NonNullable<ReturnType<typeof diagnosticM
         <text key={r.id} x={labX} y={top + i * rowH + rowH / 2 + 3} fontSize="9" fill="var(--ink)" fontFamily="var(--mono)">{r.label.length > 18 ? r.label.slice(0, 17) + '…' : r.label}</text>
       ))}
       <text x={labX} y={top + rows.length * rowH + 15} fontSize="9" fill="var(--ink)" fontFamily="var(--mono)" fontWeight={700}>Pooled (RE)</text>
-      {panel(p1x0, p1x1, 'Sensitivity', (r) => [r.sens, r.sensLow, r.sensHigh], [res.sens, res.sensLow, res.sensHigh], '#0d9488')}
-      {panel(p2x0, p2x1, 'Specificity', (r) => [r.spec, r.specLow, r.specHigh], [res.spec, res.specLow, res.specHigh], '#1746d1')}
+      {panel(p1x0, p1x1, 'Sensitivity', (r) => [r.sens, r.sensLow, r.sensHigh], [res.sens, res.sensLow, res.sensHigh], 'var(--research)')}
+      {panel(p2x0, p2x1, 'Specificity', (r) => [r.spec, r.specLow, r.specHigh], [res.spec, res.specLow, res.specHigh], 'var(--accent)')}
     </svg>
   )
 }

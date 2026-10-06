@@ -11,7 +11,7 @@ import { run, program, uniforms, perspective, type Scene } from './core'
  * left to right with a phosphor head; as it completes, the whole stack is
  * pushed one step back, so earlier strips recede into a waterfall with the
  * three QRS complexes standing in ridges. On the newest strip the coved
- * ST–T is picked out in red.
+ * ST–T is picked out in research teal.
  */
 
 const RR = 0.8 // seconds per beat in the drawing
@@ -96,14 +96,14 @@ precision mediump float;
 void main() {
   float r = length(gl_PointCoord - 0.5) * 2.0;
   float a = exp(-r * r * 4.0);
-  vec3 c = mix(vec3(1.0, 0.8, 0.0), vec3(1.0), exp(-r * r * 18.0));
+  vec3 c = mix(vec3(0.34, 0.72, 0.69), vec3(1.0), exp(-r * r * 18.0));
   gl_FragColor = vec4(c * a, a);
 }`
 
-const BG = [0.016, 0.039, 0.11, 1] // the screen, #040a1c
-const YELLOW = [1, 0.8, 0]
-const BLUE = [0.184, 0.42, 1]
-const RED = [1, 0.157, 0.275]
+const BG = [0.039, 0.047, 0.063, 1] // the graphite monitor glass
+const FRONT = [0.557, 0.651, 1]
+const BACK = [0.231, 0.373, 0.941]
+const ST = [0.341, 0.718, 0.69]
 
 const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x))
 
@@ -189,12 +189,12 @@ function build(gl: WebGLRenderingContext): Scene {
         const fade = Math.max(0, 1 - d / LINES) ** 1.3
         if (fade <= 0) continue
         const k = Math.min(1, d / 5)
-        const c = YELLOW.map((y, i) => y + (BLUE[i] - y) * k)
+        const c = FRONT.map((y, i) => y + (BACK[i] - y) * k)
         const a = 0.9 * fade
         const n = j === 0 ? Math.max(0, Math.floor(p * (S - 1))) * 2 : S * 2
         if (!n) continue
-        // the newest strip's ST–T glows red, fading back to the trace as it recedes
-        const st = j === 0 ? c.map((x, i) => x + (RED[i] - x) * (1 - push)) : c
+        // the newest strip's ST–T glows teal, fading back to the trace as it recedes
+        const st = j === 0 ? c.map((x, i) => x + (ST[i] - x) * (1 - push)) : c
         strip(S * 4, n, d, BG)
         if (j === 0) strip(S * 2, n, d, tint(c, 0.16), tint(st, 0.16))
         strip(0, n, d, tint(c, a), tint(st, a))
@@ -234,7 +234,7 @@ function drawFlat(canvas: HTMLCanvasElement) {
   const y = (mv: number) => h * 0.62 - mv * h * 0.55
   ctx.lineWidth = 2 * dpr
   ctx.lineJoin = 'round'
-  for (const [color, keep] of [['#ffcc00', () => true], ['#ff2846', (st: number) => st > 0.5]] as const) {
+  for (const [color, keep] of [['#8ea6ff', () => true], ['#57b7b0', (st: number) => st > 0.5]] as const) {
     ctx.strokeStyle = color
     ctx.beginPath()
     let pen = false

@@ -362,7 +362,7 @@ export const THEORY: TheorySection[] = [
         <EpiRegulation />
         <p>Functional causality is tested in <b>iPSC-derived cardiomyocytes</b> with patch clamp and multi-electrode arrays, including demethylation / rescue experiments.</p>
         <KB kind="research" label="Your project">
-          This is the thesis of <b>WilliamsLab / BrS-EPI</b>: promoter/enhancer methylation, repressive histone remodeling and ncRNAs reduce Na<sub>v</sub>1.5-dependent I<sub>Na</sub> <i>independently of, and additively to,</i> SCN5A coding mutations — potentially explaining variable penetrance. See the <Link to="/mechanism">Mechanism Map</Link>, <Link to="/hypotheses">Hypotheses</Link> and <Link to="/assays">Assays</Link>.
+          This is the thesis of <b>studyex_medeetomilab / BrS-EPI</b>: promoter/enhancer methylation, repressive histone remodeling and ncRNAs reduce Na<sub>v</sub>1.5-dependent I<sub>Na</sub> <i>independently of, and additively to,</i> SCN5A coding mutations — potentially explaining variable penetrance. See the <Link to="/mechanism">Mechanism Map</Link>, <Link to="/hypotheses">Hypotheses</Link> and <Link to="/assays">Assays</Link>.
         </KB>
       </>
     ),

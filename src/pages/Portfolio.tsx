@@ -62,7 +62,7 @@ export default function Portfolio() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div>
-            <Kicker>PORTFOLIO · ALL PROJECTS</Kicker>
+            <Kicker>program / portfolio</Kicker>
             <h1>Portfolio</h1>
             <p>Every review and lab project at a glance — rigor, pooled effect, pipeline and budget side by side. Open one to switch to it.</p>
           </div>
@@ -89,10 +89,10 @@ export default function Portfolio() {
       )}
 
       <div className="grid g4" style={{ marginBottom: 16 }}>
-        <StatCard value={rows.length} label="Projects" sub={`avg rigor ${Math.round(totals.avgRigor * 100)}%`} tone="#1746d1" />
+        <StatCard value={rows.length} label="Projects" sub={`avg rigor ${Math.round(totals.avgRigor * 100)}%`} tone="var(--accent)" />
         <StatCard value={totals.studies} label="Included studies" sub="across all reviews" tone="#6366f1" />
-        <StatCard value={totals.hyps} label="Hypotheses" sub={`${totals.assays} assays`} tone="#7c3aed" />
-        <StatCard value={`$${totals.cost.toLocaleString()}k`} label="Total planned budget" sub="all assays" tone="#12b981" />
+        <StatCard value={totals.hyps} label="Hypotheses" sub={`${totals.assays} assays`} tone="var(--violet)" />
+        <StatCard value={`$${totals.cost.toLocaleString()}k`} label="Total planned budget" sub="all assays" tone="var(--success)" />
       </div>
 
       <div className="tbl-scroll">

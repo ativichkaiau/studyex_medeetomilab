@@ -19,7 +19,7 @@ function download(content: string, name: string, type: string) {
 }
 
 const STATUS_LABEL: Record<PhaseStatus, string> = { 'not-started': 'Not started', active: 'Active', done: 'Done' }
-const STATUS_COLOR: Record<PhaseStatus, string> = { 'not-started': '#9aa3bd', active: '#0891b2', done: '#12b981' }
+const STATUS_COLOR: Record<PhaseStatus, string> = { 'not-started': 'var(--text-muted)', active: 'var(--research)', done: 'var(--success)' }
 
 export default function LitLink() {
   const ll = useLitLink()
@@ -37,7 +37,7 @@ export default function LitLink() {
         <Rule />
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <Kicker>PROGRAM · MENTORED LITERATURE REVIEW</Kicker>
+            <Kicker>program / litlink</Kicker>
             <h1 style={{ marginTop: 12 }}>LitLink</h1>
             <p>Groups of 3–4 น้อง, each with a <b>Mentor</b> and an <b>ACAD</b>, build from foundations to a focused review — ending in a Research Question, a Reflection, or a supported step-out. Track every group across the three phases.</p>
           </div>
@@ -51,7 +51,7 @@ export default function LitLink() {
 
       {about && (
         <div className="card lg rail" style={{ marginBottom: 16 }}>
-          <div className="card-h"><span className="sq" style={{ background: '#0891b2' }} />WHY LITLINK WORKS THIS WAY</div>
+          <div className="card-h"><span className="sq" style={{ background: 'var(--research)' }} />WHY LITLINK WORKS THIS WAY</div>
           <div className="grid g2">
             <div>
               <p className="small"><b>Last year's problems.</b></p>
@@ -75,10 +75,10 @@ export default function LitLink() {
       )}
 
       <div className="grid g4" style={{ marginBottom: 16 }}>
-        <StatCard value={stats.groups} label="Active groups" sub={`${state.cohort}`} tone="#0891b2" />
-        <StatCard value={stats.members} label="น้อง (juniors)" sub={`${(stats.members / Math.max(1, stats.groups)).toFixed(1)} per group`} tone="#1746d1" />
-        <StatCard value={stats.completed} label="Reached an outcome" sub={`${stats.outcomes['research-question']} RQ · ${stats.outcomes.reflection} reflection`} tone="#12b981" />
-        <StatCard value={stats.outcomes.dropped} label="Stepped out" sub="supported, no penalty" tone="#f59e0b" />
+        <StatCard value={stats.groups} label="Active groups" sub={`${state.cohort}`} tone="var(--research)" />
+        <StatCard value={stats.members} label="น้อง (juniors)" sub={`${(stats.members / Math.max(1, stats.groups)).toFixed(1)} per group`} tone="var(--accent)" />
+        <StatCard value={stats.completed} label="Reached an outcome" sub={`${stats.outcomes['research-question']} RQ · ${stats.outcomes.reflection} reflection`} tone="var(--success)" />
+        <StatCard value={stats.outcomes.dropped} label="Stepped out" sub="supported, no penalty" tone="var(--warning)" />
       </div>
 
       {/* phase pipeline */}
@@ -130,7 +130,7 @@ function PhaseTrack({ current, dropped }: { current: number; dropped?: boolean }
   return (
     <span className="flex" style={{ gap: 4 }}>
       {[1, 2, 3].map((n) => (
-        <span key={n} title={PHASES[n - 1].title} style={{ width: 22, height: 6, borderRadius: 3, background: dropped ? '#e3e8f4' : n <= current ? PHASES[current - 1].accent : '#e3e8f4', opacity: dropped ? 0.6 : 1 }} />
+        <span key={n} title={PHASES[n - 1].title} style={{ width: 22, height: 6, borderRadius: 3, background: dropped ? 'var(--border-subtle)' : n <= current ? PHASES[current - 1].accent : 'var(--border-subtle)', opacity: dropped ? 0.6 : 1 }} />
       ))}
       <span className="mono muted" style={{ fontSize: 11, marginLeft: 4 }}>{dropped ? '—' : `P${current}`}</span>
     </span>
@@ -155,7 +155,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
 
   async function runAi(kind: 'reading' | 'critique', messages: ChatMessage[]) {
     if (ai?.on) return
-    if (!hasKey()) { setAi({ kind, text: '_Add an OpenAI key in Knowledge Review → Settings to use AI assist._', on: false }); return }
+    if (!hasKey()) { setAi({ kind, text: '_Terra is off — add an OpenAI key in Knowledge review → Settings._', on: false }); return }
     setAi({ kind, text: '', on: true })
     const ctrl = new AbortController(); abortRef.current = ctrl
     try { await streamChat({ messages, model: getModel(), signal: ctrl.signal, onToken: (d) => setAi((a) => (a ? { ...a, text: a.text + d } : a)) }) }
@@ -195,7 +195,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
         <button className="btn ghost sm" style={{ marginBottom: 10 }} onClick={onBack}>← All groups</button>
         <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <Kicker>LITLINK · GROUP</Kicker>
+            <Kicker>program / litlink / group</Kicker>
             <input className="input" style={{ fontSize: 24, fontWeight: 800, marginTop: 8, width: '100%', maxWidth: 560 }} value={g.name} onChange={(e) => set({ name: e.target.value })} />
           </div>
           <div className="row-actions" style={{ flex: 'none', alignItems: 'center', gap: 8 }}>
@@ -214,7 +214,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
             <label className="fld"><span className="fld-l">Mentor</span><input className="input" value={g.mentor ?? ''} onChange={(e) => set({ mentor: e.target.value })} placeholder="advice · feedback · lit-review support" /></label>
             <label className="fld"><span className="fld-l">ACAD</span><input className="input" value={g.acad ?? ''} onChange={(e) => set({ acad: e.target.value })} placeholder="liaison · scheduling" /></label>
           </div>
-          <button className="btn ghost sm" onClick={suggestReading} disabled={ai?.on} title="AI suggests core concepts & landmark reviews to build the foundation first">✦ Suggest foundational reading</button>
+          <button className="btn ghost sm" onClick={suggestReading} disabled={ai?.on} title="AI suggests core concepts & landmark reviews to build the foundation first">terra · suggest foundational reading</button>
         </div>
         <div className="card lg">
           <div className="card-h" style={{ justifyContent: 'space-between' }}><span><span className="sq" style={{ background: 'var(--violet)' }} />น้อง · {g.members.length}</span></div>
@@ -236,7 +236,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
       {ai && (
         <div className="card lg rail" style={{ marginBottom: 16 }}>
           <div className="card-h" style={{ justifyContent: 'space-between' }}>
-            <span><span className="sq" style={{ background: '#0891b2' }} />{ai.kind === 'reading' ? 'AI · FOUNDATIONAL READING PLAN' : 'AI · RESEARCH-QUESTION CRITIQUE'}{ai.on ? ' · streaming…' : ''}</span>
+            <span><span className="sq" style={{ background: 'var(--research)' }} />{ai.kind === 'reading' ? 'terra · foundational reading plan' : 'terra · research-question critique'}{ai.on ? ' · streaming…' : ''}</span>
             <span className="flex" style={{ gap: 8 }}>
               {ai.on ? <button className="btn ghost sm" onClick={() => abortRef.current?.abort()}>Stop</button> : <button className="btn ghost sm" onClick={() => setAi(null)}>Dismiss</button>}
             </span>
@@ -293,7 +293,7 @@ function GroupDetail({ group, ll, onBack }: { group: LitGroup; ll: ReturnType<ty
           <>
             <label className="fld"><span className="fld-l">Research Question <span className="muted">— a question current knowledge can't yet answer</span></span><textarea className="textarea" rows={3} value={g.researchQuestion ?? ''} onChange={(e) => set({ researchQuestion: e.target.value })} placeholder="State the group's research question." /></label>
             <div className="flex" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              <button className="btn ghost sm" onClick={critiqueRQ} disabled={ai?.on || !g.researchQuestion?.trim()}>✦ Critique this question</button>
+              <button className="btn ghost sm" onClick={critiqueRQ} disabled={ai?.on || !g.researchQuestion?.trim()}>terra · critique this question</button>
               {g.promotedProjectId
                 ? <button className="btn primary sm" onClick={promote}>Open the review project →</button>
                 : <button className="btn primary sm" onClick={promote} disabled={!g.researchQuestion?.trim()} title="Create a systematic-review project seeded with this question">🚀 Promote to a review project →</button>}
