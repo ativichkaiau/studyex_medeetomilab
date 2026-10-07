@@ -30,6 +30,18 @@ export const BRAND = {
   version: '0.2',
 } as const
 
+/**
+ * The drug behind "medeetomi": dexmedetomidine, the (S)-enantiomer of medetomidine. Its skeletal
+ * formula is the logo (components/Molecule.tsx, public/icon.svg, public/favicon.svg).
+ */
+export const MOLECULE = {
+  name: 'dexmedetomidine',
+  formula: 'C13H16N2',
+  iupac: '5-[(1S)-1-(2,3-dimethylphenyl)ethyl]-1H-imidazole',
+  pubchemCid: 5311068,
+  url: 'https://pubchem.ncbi.nlm.nih.gov/compound/5311068',
+} as const
+
 /** "<code> // studyex_medeetomilab", the per-project document title */
 export const projectTitle = (code: string, module?: string) =>
   `${code}${module ? ` · ${module}` : ''} // ${BRAND.name}`

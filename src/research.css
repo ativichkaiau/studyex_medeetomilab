@@ -60,13 +60,17 @@
    ============================================================ */
 .ov-head{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; margin-bottom:14px; padding-bottom:14px;
   border-bottom:1px solid var(--border-subtle)}
-.ov-runtime{font-family:var(--font-mono); font-size:13px; color:var(--text-primary)}
+.ov-brand{display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; min-width:0}
+.ov-runtime{font-family:var(--font-mono); font-size:13px; color:var(--text-primary); min-width:0}
+.ov-formula{display:inline-block; margin-top:6px; font-size:11px; color:var(--text-secondary)}
+.ov-formula:hover{color:var(--accent-ink); text-decoration:none}
 .ov-runtime b{color:var(--accent); font-weight:500}
 .ov-runtime small{display:block; margin-top:2px; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted)}
 .ov-title{font-size:19px; font-weight:600; letter-spacing:-.015em; line-height:1.3; margin-top:12px; max-width:900px; text-wrap:balance}
 .ov-actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
 .ov-grid{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:12px; align-items:start}
 @media(max-width:1100px){.ov-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.ov-brand{column-gap:12px} .ov-brand .ov-mol{height:56px; width:auto}}
 .ov-col{display:flex; flex-direction:column; gap:12px; min-width:0}
 
 /* the pipeline as a table: stage, state, numbers, what's in the way */

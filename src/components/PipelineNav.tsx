@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { MODULES, GROUP_LABEL, type ModuleGroup } from '../lib/modules'
 import { STATE_LABEL, type Stage } from '../lib/pipeline'
 import { StateDot } from './ui'
-import { BRAND } from '../lib/brand'
+import { BRAND, MOLECULE } from '../lib/brand'
+import { DexMark, Formula } from './Molecule'
 
 const GROUPS: ModuleGroup[] = ['project', 'pipeline', 'qa', 'output', 'knowledge', 'bench', 'program']
 const COLLAPSED_KEY = 'williamslab.nav.collapsed'
@@ -44,6 +45,7 @@ export default function PipelineNav({ stages, open, openFlags, onClose }: { stag
   return (
     <aside className={`sidebar${open ? ' open' : ''}`} aria-label="Navigator">
       <div className="sb-brand">
+        <DexMark size={20} />
         <span>studyex_medeetomilab<b>_</b></span>
         <button className="sb-close" onClick={onClose} aria-label="Close navigator">✕</button>
       </div>
@@ -94,6 +96,7 @@ export default function PipelineNav({ stages, open, openFlags, onClose }: { stag
       <div className="sb-foot">
         <div>{BRAND.namespace.toLowerCase()} / <b>{BRAND.name}</b></div>
         <div>runtime {BRAND.runtime.split(' ')[0]} · v{BRAND.version}</div>
+        <div title={MOLECULE.iupac}>{MOLECULE.name} · <Formula /></div>
       </div>
     </aside>
   )

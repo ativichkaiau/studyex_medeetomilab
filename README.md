@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/brand/dexmedetomidine-dark.svg">
+  <img src="public/brand/dexmedetomidine-light.svg" alt="Skeletal formula of dexmedetomidine, C13H16N2" width="96">
+</picture>
+
 # studyex_medeetomilab
 
 A browser-based research runtime for evidence synthesis, systematic reviews, meta-analysis, research quality checks, and manuscript preparation. The interface presents each project as a structured record with a live pipeline, a searchable evidence registry, a context panel, and exportable artifacts.
@@ -46,6 +51,6 @@ The evidence model retains exact source passages apart from interpretations. The
 
 ## Design and deployment
 
-The app mark is a graphite `m_` with a blue cursor. PWA files are `public/manifest.webmanifest`, `public/sw.js`, `public/icon.svg`, `public/icon-180.png`, and `public/icon-512.png`. The production build writes a versioned service worker that precaches the shell, route chunks, styles, icons, and bundled fonts; external research/API requests go to the network.
+The logo is the skeletal formula of dexmedetomidine (C<sub>13</sub>H<sub>16</sub>N<sub>2</sub>, [PubChem CID 5311068](https://pubchem.ncbi.nlm.nih.gov/compound/5311068)), drawn with its bonds in the text colour and its two nitrogens in the accent blue. `public/icon.svg` and its PNG renders carry the full structure. `public/favicon.svg` uses a heavier mark that stays legible at tab size. `public/brand/dexmedetomidine-dark.svg` and `dexmedetomidine-light.svg` are transparent versions for dark and light backgrounds. In the app, `src/components/Molecule.tsx` draws both forms from the same coordinates. PWA files are `public/manifest.webmanifest`, `public/sw.js`, `public/icon.svg`, `public/icon-180.png`, and `public/icon-512.png`. The production build writes a versioned service worker that precaches the shell, route chunks, styles, icons, and bundled fonts; external research/API requests go to the network.
 
 The interface supports reduced motion and keyboard focus. The optional 3D layer uses the same graphite, blue, teal, and status colours as the flat design. Verify the built app at desktop and phone widths before deploying a redesign.
