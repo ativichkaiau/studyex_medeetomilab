@@ -23,6 +23,7 @@ import { analysisIncluded } from '../lib/cohorts'
 import { hasKey } from '../lib/openai'
 import { openTerra } from '../lib/terra'
 import { BRAND, projectTitle } from '../lib/brand'
+import { DexMark } from './Molecule'
 
 // g-chord destinations (press "g" then the key)
 const GNAV: Record<string, string> = {
@@ -176,6 +177,7 @@ export default function Layout() {
       <header className="topbar">
         <button className="hamburger" onClick={() => setNavOpen(true)} aria-label="Open navigator">☰</button>
         <Link className="brand" to="/" aria-label={`${BRAND.name} — project overview`}>
+          <DexMark size={20} />
           <span className="brand-full">studyex_medeetomilab<b>_</b></span>
           <span className="brand-short">medeetomilab<b>_</b></span>
         </Link>

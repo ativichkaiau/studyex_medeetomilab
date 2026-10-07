@@ -128,12 +128,17 @@ kbd{font-family:var(--font-mono); font-size:10.5px; color:var(--text-secondary);
 .brand:hover{text-decoration:none; background:var(--bg-hover)}
 .brand b{color:var(--accent); font-weight:500}
 .brand .brand-short{display:none}
+/* the logo (components/Molecule.tsx): bonds in the text colour, nitrogens in the accent */
+.dex{display:block; flex:none; overflow:visible; color:var(--text-primary)}
+.dex .dex-n{fill:var(--accent)}
+.dex .dex-n-label{stroke:var(--accent)}
+.formula sub{font-size:.78em; line-height:0; vertical-align:-.22em}
 .tb-title{flex:1; min-width:0; display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px;
   color:var(--text-muted); white-space:nowrap; overflow:hidden}
 .tb-path{overflow:hidden; text-overflow:ellipsis}
 .tb-path b{color:var(--text-primary); font-weight:500}
 .tb-path i{font-style:normal; color:var(--text-secondary)}
-.tb-search{display:flex; align-items:center; gap:10px; width:min(300px,28vw); height:28px; padding:0 8px 0 10px; flex:none;
+.tb-search{display:flex; align-items:center; gap:10px; width:min(300px,28vw); min-width:120px; height:28px; padding:0 8px 0 10px; flex:0 1 auto;
   border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--bg-inset); color:var(--text-muted);
   font-family:var(--font-mono); font-size:11.5px; cursor:pointer; text-align:left}
 .tb-search:hover{border-color:var(--text-faint); color:var(--text-secondary)}
@@ -259,6 +264,14 @@ a.sbar-item:hover,button.sbar-item:hover{background:var(--bg-hover); color:var(-
 @media(max-width:1180px){
   .shell.ctx-on .main{margin-right:0}
   .context{display:none}
+  /* the workspace controls fold into the ••• menu below the width that fits them in one row */
+  .tb-tools-toggle{display:inline-flex!important}
+  .tb-tools{display:none; position:absolute; right:8px; top:calc(var(--topbar-h) + 4px); min-width:220px;
+    padding:10px; flex-wrap:wrap; justify-content:flex-start; background:var(--bg-panel); border:1px solid var(--border-strong);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-pop); z-index:42}
+  .tb-tools.open{display:flex}
+  .tb-tools .kbd-btn{display:inline-flex}
+  .tb-tools .theme-select{flex:1}
 }
 @media(max-width:960px){
   .hamburger{display:inline-flex}
@@ -284,13 +297,6 @@ a.sbar-item:hover,button.sbar-item:hover{background:var(--bg-hover); color:var(-
   .statusbar{display:none}
   .sidebar{bottom:0}
   .kbd-btn,.undo-group,.tb-sep{display:none}
-  .tb-tools-toggle{display:inline-flex!important}
-  .tb-tools{display:none; position:absolute; right:8px; top:calc(var(--topbar-h) + 4px); min-width:220px;
-    padding:10px; flex-wrap:wrap; justify-content:flex-start; background:var(--bg-panel); border:1px solid var(--border-strong);
-    border-radius:var(--radius-md); box-shadow:var(--shadow-pop); z-index:42}
-  .tb-tools.open{display:flex}
-  .tb-tools .kbd-btn{display:inline-flex}
-  .tb-tools .theme-select{flex:1}
   .brand .brand-full{display:none}
   .brand .brand-short{display:inline}
   .tb-search{flex:none; width:32px; min-width:32px; height:30px; padding:0; justify-content:center}
@@ -305,9 +311,9 @@ a.sbar-item:hover,button.sbar-item:hover{background:var(--bg-hover); color:var(-
   .seg{max-width:100%; overflow-x:auto}
   .seg-b{flex:none}
 }
-@media(max-width:420px){
+@media(max-width:520px){
   .proj-chip small{display:none}
-  .topbar .brand{display:none}
+  .topbar .brand .brand-short{display:none}
   .topbar .right{margin-left:auto}
   .topbar .tag{max-width:82px; overflow:hidden; text-overflow:ellipsis}
 }

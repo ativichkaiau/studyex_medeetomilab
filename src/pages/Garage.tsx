@@ -9,7 +9,8 @@ import { hasCuratedTheory } from '../lib/projectTheory'
 import { pipeline } from '../lib/pipeline'
 import { rigorId } from '../lib/ids'
 import { isRegistered, reviewType, stamp } from '../lib/projectFacts'
-import { exportName, BRAND } from '../lib/brand'
+import { exportName, BRAND, MOLECULE } from '../lib/brand'
+import { DexStructure, Formula } from '../components/Molecule'
 import { openTerra, TERRA_TASKS } from '../lib/terra'
 import EcgMonitor from '../components/EcgMonitor'
 
@@ -74,7 +75,15 @@ export default function Garage() {
     <>
       <div className="ov-head">
         <div style={{ minWidth: 0 }}>
-          <div className="ov-runtime">studyex_medeetomilab<b>_</b><small>research runtime</small></div>
+          <div className="ov-brand">
+            <DexStructure size={72} title="" className="ov-mol" />
+            <div className="ov-runtime">
+              studyex_medeetomilab<b>_</b><small>research runtime</small>
+              <a className="ov-formula" href={MOLECULE.url} target="_blank" rel="noreferrer" title={`${MOLECULE.iupac} — PubChem CID ${MOLECULE.pubchemCid}`}>
+                {MOLECULE.name} · <Formula />
+              </a>
+            </div>
+          </div>
           {editing ? (
             <textarea className="textarea" style={{ width: '100%', maxWidth: 860, fontSize: 17, fontWeight: 600, marginTop: 12 }} rows={2} value={state.project.name} onChange={(e) => updateProject({ name: e.target.value })} placeholder="Project title" aria-label="Project title" />
           ) : (
